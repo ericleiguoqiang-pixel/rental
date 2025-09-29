@@ -1,0 +1,25 @@
+.idea
+.qoder
+.vscode
+
+# Maven target directories
+target/
+*/target/
+
+# Java compiled classes
+*.class
+
+# Log files
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE specific files
+.classpath
+.project
+.settings/
+
+rental-merchant-web/node_modules/

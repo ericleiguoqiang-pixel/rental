@@ -1,0 +1,67 @@
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #282c34;
+  padding: 20px;
+  color: white;
+}
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-form {
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width: 400px;
+}
+
+.login-title {
+  text-align: center;
+  margin-bottom: 32px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.dashboard-container {
+  min-height: 100vh;
+}
+
+.dashboard-header {
+  background: #fff;
+  padding: 0 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-content {
+  margin: 24px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-welcome {
+  text-align: center;
+  padding: 60px 0;
+}
+
+.dashboard-welcome h1 {
+  font-size: 32px;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.dashboard-welcome p {
+  font-size: 16px;
+  color: #666;
+}
