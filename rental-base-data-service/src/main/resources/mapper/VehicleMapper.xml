@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rental.saas.basedata.mapper.VehicleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.rental.saas.basedata.entity.Vehicle">
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="store_id" property="storeId"/>
+        <result column="license_plate" property="licensePlate"/>
+        <result column="car_model_id" property="carModelId"/>
+        <result column="license_type" property="licenseType"/>
+        <result column="register_date" property="registerDate"/>
+        <result column="vin" property="vin"/>
+        <result column="engine_no" property="engineNo"/>
+        <result column="usage_nature" property="usageNature"/>
+        <result column="audit_status" property="auditStatus"/>
+        <result column="online_status" property="onlineStatus"/>
+        <result column="vehicle_status" property="vehicleStatus"/>
+        <result column="mileage" property="mileage"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+</mapper>

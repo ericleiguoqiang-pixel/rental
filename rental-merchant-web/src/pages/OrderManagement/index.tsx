@@ -1,11 +1,22 @@
 import React from 'react'
-import { Card, Table, Button, Space, Tag, Select, DatePicker, Input } from 'antd'
+import { Card, Table, Button, Space, Tag, Select, DatePicker, Input, Spin } from 'antd'
 import { EyeOutlined, EditOutlined } from '@ant-design/icons'
+import MainLayout from '../../components/MainLayout'
+import { useOrders, Order } from '../../hooks/useOrders'
 
 const { RangePicker } = DatePicker
 const { Search } = Input
 
 const OrderManagement: React.FC = () => {
+  const { orders, loading, updateOrderStatus } = useOrders()
+  
+  const handleStatusUpdate = async (id: string, status: string) => {
+    try {
+      await updateOrderStatus(id, status)
+    } catch (error) {
+      // 错误信息已在 hook 中处理
+    }
+  }
   const columns = [
     {
       title: '订单号',
@@ -52,64 +63,53 @@ const OrderManagement: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      render: () => (
+      render: (_, record: Order) => (
         <Space size="middle">
           <Button type="link" icon={<EyeOutlined />}>查看</Button>
-          <Button type="link" icon={<EditOutlined />}>处理</Button>
+          <Button 
+            type="link" 
+            icon={<EditOutlined />}
+            onClick={() => {
+              // 这里可以打开状态更新对话框
+              console.log('处理订单:', record.id)
+            }}
+          >
+            处理
+          </Button>
         </Space>
       ),
     },
   ]
 
-  const mockData = [
-    {
-      key: '1',
-      orderNo: 'R20231201001',
-      customerName: '张三',
-      vehicleInfo: '沪A12345 大众朗逸',
-      duration: '2023-12-01 至 2023-12-03',
-      totalAmount: 450,
-      status: 'ongoing',
-    },
-    {
-      key: '2',
-      orderNo: 'R20231201002',
-      customerName: '李四',
-      vehicleInfo: '沪B67890 日产轩逸',
-      duration: '2023-12-02 至 2023-12-05',
-      totalAmount: 560,
-      status: 'confirmed',
-    },
-    {
-      key: '3',
-      orderNo: 'R20231130001',
-      customerName: '王五',
-      vehicleInfo: '沪C11111 特斯拉Model 3',
-      duration: '2023-11-30 至 2023-12-01',
-      totalAmount: 600,
-      status: 'completed',
-    },
-  ]
+  const mockData = orders
 
   return (
-    <Card 
-      title="订单管理"
-      extra={
-        <Space>
-          <Search placeholder="搜索订单号/客户" style={{ width: 200 }} />
-          <Select defaultValue="all" style={{ width: 120 }}>
-            <Select.Option value="all">全部状态</Select.Option>
-            <Select.Option value="pending">待确认</Select.Option>
-            <Select.Option value="confirmed">已确认</Select.Option>
-            <Select.Option value="ongoing">进行中</Select.Option>
-            <Select.Option value="completed">已完成</Select.Option>
-          </Select>
-          <RangePicker placeholder={['开始日期', '结束日期']} />
-        </Space>
-      }
-    >
-      <Table columns={columns} dataSource={mockData} />
-    </Card>
+    <MainLayout title="订单管理">
+      <Spin spinning={loading}>
+        <Card 
+          title="订单列表"
+          extra={
+            <Space>
+              <Search placeholder="搜索订单号/客户" style={{ width: 200 }} />
+              <Select defaultValue="all" style={{ width: 120 }}>
+                <Select.Option value="all">全部状态</Select.Option>
+                <Select.Option value="pending">待确认</Select.Option>
+                <Select.Option value="confirmed">已确认</Select.Option>
+                <Select.Option value="ongoing">进行中</Select.Option>
+                <Select.Option value="completed">已完成</Select.Option>
+              </Select>
+              <RangePicker placeholder={['开始日期', '结束日期']} />
+            </Space>
+          }
+        >
+          <Table 
+            columns={columns} 
+            dataSource={mockData.map(item => ({ ...item, key: item.id }))}
+            loading={loading}
+          />
+        </Card>
+      </Spin>
+    </MainLayout>
   )
 }
 

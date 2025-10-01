@@ -11,6 +11,7 @@ import {
   SettingOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  AuditOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 
@@ -34,6 +35,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '仪表盘' }
     if (path === '/stores') return ['stores'];
     if (path === '/vehicles') return ['vehicles'];
     if (path === '/orders') return ['orders'];
+    if (path === '/merchant-audit') return ['merchant-audit'];
     return ['dashboard'];
   };
 
@@ -50,6 +52,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '仪表盘' }
         break;
       case 'orders':
         navigate('/orders');
+        break;
+      case 'merchant-audit':
+        navigate('/merchant-audit');
         break;
       default:
         break;
@@ -76,6 +81,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '仪表盘' }
       key: 'orders',
       icon: <FileTextOutlined />,
       label: '订单管理',
+    },
+    {
+      key: 'merchant-audit',
+      icon: <AuditOutlined />,
+      label: '商户审核',
     },
   ];
 

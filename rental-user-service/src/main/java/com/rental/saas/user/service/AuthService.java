@@ -29,4 +29,9 @@ public interface AuthService {
      * 获取验证码
      */
     String getCaptcha();
+
+    /**
+     * 验证访问令牌
+     */
+    boolean verifyToken(String accessToken);
 }

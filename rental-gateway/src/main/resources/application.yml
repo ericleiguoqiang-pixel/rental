@@ -4,43 +4,20 @@ server:
 spring:
   application:
     name: rental-gateway
+  profiles:
+    active: dev
   main:
     web-application-type: reactive
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
       - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
-
-  config:
-    import:
-      - optional:nacos:rental-gateway.yml
-  
   cloud:
-    nacos:
-      discovery:
-        server-addr: 43.143.163.102:8848
-        namespace: rental-saas
-        group: DEFAULT_GROUP
-      config:
-        server-addr: 43.143.163.102:8848
-        namespace: rental-saas
-        group: DEFAULT_GROUP
-        file-extension: yml
-    
     gateway:
       discovery:
         locator:
           enabled: true
           lower-case-service-id: true
-      
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowed-origins: "*"
-            allowed-methods: "*"
-            allowed-headers: "*"
-            allow-credentials: true
-            max-age: 3600
       
       # 路由配置
       routes:
@@ -78,35 +55,6 @@ spring:
             - Path=/api/payments/**,/api/refunds/**
           filters:
             - StripPrefix=0
-
-  # Redis配置
-  redis:
-    host: 43.143.163.102
-    port: 6379
-    password: 
-    database: 0
-    timeout: 3000ms
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: -1ms
-
-# JWT配置
-app:
-  jwt:
-    secret: rental-saas-jwt-secret-key-2024
-    access-token-expiration: 7200000  # 2小时
-    refresh-token-expiration: 2592000000  # 30天
-
-# 日志配置
-logging:
-  level:
-    com.rental.saas: DEBUG
-    org.springframework.cloud.gateway: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId}] %logger{50} - %msg%n"
 
 # 监控配置
 management:

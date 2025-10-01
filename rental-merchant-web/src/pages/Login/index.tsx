@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Form, Input, Button, Card, Typography, message, Row, Col } from 'antd'
 import { UserOutlined, LockOutlined, ReloadOutlined } from '@ant-design/icons'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { authAPI } from '../../services/api'
 
 const { Title } = Typography
@@ -12,10 +13,15 @@ interface LoginForm {
 }
 
 const Login: React.FC = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [captchaKey, setCaptchaKey] = useState('')
   const [captchaText, setCaptchaText] = useState('')
+  
+  // 获取从哪个页面跳转过来的
+  const from = location.state?.from?.pathname || '/dashboard'
 
   // 获取验证码
   const fetchCaptcha = async () => {
@@ -54,13 +60,13 @@ const Login: React.FC = () => {
       
       // 登录成功，保存token
       if (response.code === 200) {
-        localStorage.setItem('accessToken', response.data.accessToken)
+        localStorage.setItem('token', response.data.accessToken || response.data.token)
         localStorage.setItem('refreshToken', response.data.refreshToken)
         localStorage.setItem('userInfo', JSON.stringify(response.data.userInfo))
         
         message.success('登录成功！')
-        // 跳转到仪表板
-        window.location.href = '/dashboard'
+        // 跳转到目标页面或仪表板
+        navigate(from, { replace: true })
       } else {
         message.error(response.message || '登录失败')
         // 刷新验证码
@@ -74,7 +80,7 @@ const Login: React.FC = () => {
       if (error.message.includes('Failed to fetch') || error.message.includes('Network Error')) {
         message.warning('后端服务暂时不可用，使用模拟登录')
         // 模拟登录成功
-        localStorage.setItem('accessToken', 'mock_token_' + Date.now())
+        localStorage.setItem('token', 'mock_token_' + Date.now())
         localStorage.setItem('userInfo', JSON.stringify({
           userId: 1,
           username: values.username,
@@ -83,7 +89,7 @@ const Login: React.FC = () => {
           roleTypeDesc: '超级管理员'
         }))
         message.success('登录成功！')
-        window.location.href = '/dashboard'
+        navigate(from, { replace: true })
       } else {
         message.error('登录失败，请检查用户名和密码')
         // 刷新验证码
@@ -96,9 +102,21 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="login-container">
-      <Card className="login-form">
-        <Title level={2} className="login-title">
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px'
+    }}>
+      <Card style={{
+        width: '100%',
+        maxWidth: 400,
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        borderRadius: 12
+      }}>
+        <Title level={2} style={{ textAlign: 'center', marginBottom: 8 }}>
           租车SaaS系统
         </Title>
         <Title level={4} style={{ textAlign: 'center', marginBottom: 32, color: '#666' }}>
@@ -164,6 +182,12 @@ const Login: React.FC = () => {
             </Button>
           </Form.Item>
         </Form>
+        
+        <div style={{ textAlign: 'center', marginTop: 24 }}>
+          <Button type="link" onClick={() => navigate('/register')}>
+            没有账户？立即注册
+          </Button>
+        </div>
       </Card>
     </div>
   )

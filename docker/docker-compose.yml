@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  # MySQL数据库
+  mysql:
+    image: mysql:8.0
+    container_name: rental-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: rental_saas
+      MYSQL_USER: rental
+      MYSQL_PASSWORD: rental123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docs/sql:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - rental-network
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: rental-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - rental-network
+
+  # Nacos注册中心和配置中心
+  nacos:
+    image: nacos/nacos-server:v2.3.0
+    container_name: rental-nacos
+    environment:
+      MODE: standalone
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_DB_NAME: nacos
+      MYSQL_SERVICE_USER: root
+      MYSQL_SERVICE_PASSWORD: 123456
+      MYSQL_SERVICE_DB_PARAM: characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=GMT%2B8
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    volumes:
+      - nacos_data:/home/nacos/data
+    depends_on:
+      - mysql
+    networks:
+      - rental-network
+
+  # RocketMQ NameServer
+  rocketmq-nameserver:
+    image: apache/rocketmq:4.9.4
+    container_name: rental-rocketmq-nameserver
+    ports:
+      - "9876:9876"
+    environment:
+      JAVA_OPT_EXT: "-Duser.home=/home/rocketmq -Xms512m -Xmx512m"
+    command: ["sh", "mqnamesrv"]
+    volumes:
+      - rocketmq_nameserver_data:/home/rocketmq/logs
+    networks:
+      - rental-network
+
+  # RocketMQ Broker
+  rocketmq-broker:
+    image: apache/rocketmq:4.9.4
+    container_name: rental-rocketmq-broker
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+    environment:
+      JAVA_OPT_EXT: "-Duser.home=/home/rocketmq -Xms512m -Xmx512m"
+      NAMESRV_ADDR: "rocketmq-nameserver:9876"
+    command: ["sh", "mqbroker", "-c", "/home/rocketmq/conf/broker.conf"]
+    volumes:
+      - rocketmq_broker_data:/home/rocketmq/logs
+      - rocketmq_broker_store:/home/rocketmq/store
+      - ./docker/rocketmq/broker.conf:/home/rocketmq/conf/broker.conf
+    depends_on:
+      - rocketmq-nameserver
+    networks:
+      - rental-network
+
+  # RocketMQ Console
+  rocketmq-console:
+    image: styletang/rocketmq-console-ng:latest
+    container_name: rental-rocketmq-console
+    ports:
+      - "8080:8080"
+    environment:
+      JAVA_OPTS: "-Drocketmq.namesrv.addr=rocketmq-nameserver:9876"
+    depends_on:
+      - rocketmq-nameserver
+    networks:
+      - rental-network
+
+volumes:
+  mysql_data:
+  redis_data:
+  nacos_data:
+  rocketmq_nameserver_data:
+  rocketmq_broker_data:
+  rocketmq_broker_store:
+
+networks:
+  rental-network:
+    driver: bridge

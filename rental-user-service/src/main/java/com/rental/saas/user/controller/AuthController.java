@@ -2,6 +2,7 @@ package com.rental.saas.user.controller;
 
 import com.rental.saas.common.annotation.OperationLog;
 import com.rental.saas.common.response.ApiResponse;
+import com.rental.saas.common.response.ResponseCode;
 import com.rental.saas.user.dto.request.LoginRequest;
 import com.rental.saas.user.dto.response.LoginResponse;
 import com.rental.saas.user.service.AuthService;
@@ -62,5 +63,20 @@ public class AuthController {
     public ApiResponse<String> getCaptcha() {
         String captcha = authService.getCaptcha();
         return ApiResponse.success("验证码获取成功", captcha);
+    }
+
+    @PostMapping("/verify")
+    @Operation(summary = "验证令牌", description = "验证访问令牌是否有效")
+    @OperationLog(type = "用户认证", description = "验证令牌")
+    public ApiResponse<Void> verifyToken(@RequestHeader("Authorization") String authorization) {
+        // 提取访问令牌
+        String accessToken = authorization.substring(7); // 去掉 "Bearer " 前缀
+        boolean isValid = authService.verifyToken(accessToken);
+        
+        if (isValid) {
+            return ApiResponse.success();
+        } else {
+            return ApiResponse.error(ResponseCode.TOKEN_INVALID);
+        }
     }
 }

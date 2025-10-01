@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rental.saas.user.mapper.EmployeeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.rental.saas.user.entity.Employee">
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="store_id" property="storeId"/>
+        <result column="employee_name" property="employeeName"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="phone" property="phone"/>
+        <result column="role_type" property="roleType"/>
+        <result column="status" property="status"/>
+        <result column="last_login_time" property="lastLoginTime"/>
+        <result column="last_login_ip" property="lastLoginIp"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <!-- 根据用户名和租户ID查询员工 -->
+    <select id="findByUsernameAndTenantId" resultMap="BaseResultMap">
+        SELECT * FROM employee 
+        WHERE username = #{username} 
+          AND tenant_id = #{tenantId} 
+          AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <!-- 根据手机号查询员工 -->
+    <select id="findByPhone" resultMap="BaseResultMap">
+        SELECT * FROM employee 
+        WHERE phone = #{phone} 
+          AND deleted = 0
+        LIMIT 1
+    </select>
+
+</mapper>

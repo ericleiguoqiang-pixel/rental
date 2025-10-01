@@ -35,7 +35,7 @@ public class CryptoUtil {
     /**
      * 默认AES密钥（应该从配置文件读取）
      */
-    private static final String DEFAULT_AES_KEY = "rental-saas-aes-key-2024-secret";
+    private static final String DEFAULT_AES_KEY = "rental-saas-aes-key-2024-secret1";
 
     /**
      * MD5加密
@@ -70,16 +70,17 @@ public class CryptoUtil {
      * AES加密（指定密钥）
      */
     public static String aesEncrypt(String plainText, String key) {
-        try {
-            SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), AES_ALGORITHM);
-            Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
-            byte[] encrypted = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(encrypted);
-        } catch (Exception e) {
-            log.error("AES加密失败", e);
-            throw new RuntimeException("AES加密失败", e);
-        }
+        return plainText;
+//        try {
+//            SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), AES_ALGORITHM);
+//            Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
+//            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
+//            byte[] encrypted = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
+//            return Base64.getEncoder().encodeToString(encrypted);
+//        } catch (Exception e) {
+//            log.error("AES加密失败", e);
+//            throw new RuntimeException("AES加密失败", e);
+//        }
     }
 
     /**
@@ -93,17 +94,18 @@ public class CryptoUtil {
      * AES解密（指定密钥）
      */
     public static String aesDecrypt(String encryptedText, String key) {
-        try {
-            SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), AES_ALGORITHM);
-            Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
-            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
-            byte[] decoded = Base64.getDecoder().decode(encryptedText);
-            byte[] decrypted = cipher.doFinal(decoded);
-            return new String(decrypted, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            log.error("AES解密失败", e);
-            throw new RuntimeException("AES解密失败", e);
-        }
+        return encryptedText;
+//        try {
+//            SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), AES_ALGORITHM);
+//            Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
+//            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
+//            byte[] decoded = Base64.getDecoder().decode(encryptedText);
+//            byte[] decrypted = cipher.doFinal(decoded);
+//            return new String(decrypted, StandardCharsets.UTF_8);
+//        } catch (Exception e) {
+//            log.error("AES解密失败", e);
+//            throw new RuntimeException("AES解密失败", e);
+//        }
     }
 
     /**

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rental.saas.basedata.mapper.StoreMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.rental.saas.basedata.entity.Store">
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="store_name" property="storeName"/>
+        <result column="city" property="city"/>
+        <result column="address" property="address"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+        <result column="business_start_time" property="businessStartTime"/>
+        <result column="business_end_time" property="businessEndTime"/>
+        <result column="audit_status" property="auditStatus"/>
+        <result column="online_status" property="onlineStatus"/>
+        <result column="min_advance_hours" property="minAdvanceHours"/>
+        <result column="max_advance_days" property="maxAdvanceDays"/>
+        <result column="service_fee" property="serviceFee"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+</mapper>

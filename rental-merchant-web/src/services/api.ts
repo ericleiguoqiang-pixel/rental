@@ -3,9 +3,11 @@ const API_BASE_URL = '/api'
 
 // 通用请求函数
 export const request = async (url: string, options: RequestInit = {}) => {
+  const token = localStorage.getItem('token')
   const config: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
       ...options.headers,
     },
     ...options,
@@ -15,7 +17,13 @@ export const request = async (url: string, options: RequestInit = {}) => {
     const response = await fetch(`${API_BASE_URL}${url}`, config)
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      if (response.status === 401) {
+        // Token 过期或无效，跳转到登录页
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+        throw new Error('身份验证失效，请重新登录')
+      }
+      throw new Error(`请求失败: ${response.status}`)
     }
     
     const data = await response.json()
@@ -114,4 +122,32 @@ export const authAPI = {
         'Authorization': `Bearer ${token}`,
       },
     }),
+}
+
+// 仪表盘API
+export const dashboardAPI = {
+  // 获取仪表盘统计数据
+  getStats: () => request('/dashboard/stats'),
+}
+
+// 商户API
+export const merchantAPI = {
+  // 商户注册
+  register: (data: any) => request('/merchant/register', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  
+  // 获取商户申请列表
+  getApplications: () => request('/merchant/applications'),
+  
+  // 审核商户申请
+  auditApplication: (id: string, data: { status: string; reason: string }) => 
+    request(`/merchant/applications/${id}/audit`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  
+  // 获取商户申请详情
+  getApplicationDetail: (id: string) => request(`/merchant/applications/${id}`),
 }

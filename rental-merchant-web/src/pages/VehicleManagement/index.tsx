@@ -1,10 +1,21 @@
 import React from 'react'
-import { Card, Table, Button, Space, Tag, Select, Input } from 'antd'
+import { Card, Table, Button, Space, Tag, Select, Input, Spin, Popconfirm } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons'
+import MainLayout from '../../components/MainLayout'
+import { useVehicles, Vehicle } from '../../hooks/useVehicles'
 
 const { Search } = Input
 
 const VehicleManagement: React.FC = () => {
+  const { vehicles, loading, deleteVehicle } = useVehicles()
+  
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteVehicle(id)
+    } catch (error) {
+      // 错误信息已在 hook 中处理
+    }
+  }
   const columns = [
     {
       title: '车牌号',
@@ -50,63 +61,51 @@ const VehicleManagement: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      render: () => (
+      render: (_, record: Vehicle) => (
         <Space size="middle">
           <Button type="link" icon={<EditOutlined />}>编辑</Button>
-          <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
+          <Popconfirm
+            title="删除车辆"
+            description="确定要删除这辆车吗？"
+            onConfirm={() => handleDelete(record.id)}
+            okText="确定"
+            cancelText="取消"
+          >
+            <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
+          </Popconfirm>
         </Space>
       ),
     },
   ]
 
-  const mockData = [
-    {
-      key: '1',
-      plateNumber: '沪A12345',
-      model: '朗逸',
-      brand: '大众',
-      color: '白色',
-      status: 'available',
-      dailyRate: 150,
-    },
-    {
-      key: '2',
-      plateNumber: '沪B67890',
-      model: '轩逸',
-      brand: '日产',
-      color: '银色',
-      status: 'rented',
-      dailyRate: 140,
-    },
-    {
-      key: '3',
-      plateNumber: '沪C11111',
-      model: 'Model 3',
-      brand: '特斯拉',
-      color: '黑色',
-      status: 'maintenance',
-      dailyRate: 300,
-    },
-  ]
+  const mockData = vehicles
 
   return (
-    <Card 
-      title="车辆管理"
-      extra={
-        <Space>
-          <Search placeholder="搜索车牌号" style={{ width: 200 }} />
-          <Select defaultValue="all" style={{ width: 120 }}>
-            <Select.Option value="all">全部状态</Select.Option>
-            <Select.Option value="available">可租用</Select.Option>
-            <Select.Option value="rented">已租出</Select.Option>
-            <Select.Option value="maintenance">维护中</Select.Option>
-          </Select>
-          <Button type="primary" icon={<PlusOutlined />}>新增车辆</Button>
-        </Space>
-      }
-    >
-      <Table columns={columns} dataSource={mockData} />
-    </Card>
+    <MainLayout title="车辆管理">
+      <Spin spinning={loading}>
+        <Card 
+          title="车辆列表"
+          extra={
+            <Space>
+              <Search placeholder="搜索车牌号" style={{ width: 200 }} />
+              <Select defaultValue="all" style={{ width: 120 }}>
+                <Select.Option value="all">全部状态</Select.Option>
+                <Select.Option value="available">可租用</Select.Option>
+                <Select.Option value="rented">已租出</Select.Option>
+                <Select.Option value="maintenance">维护中</Select.Option>
+              </Select>
+              <Button type="primary" icon={<PlusOutlined />}>新增车辆</Button>
+            </Space>
+          }
+        >
+          <Table 
+            columns={columns} 
+            dataSource={mockData.map(item => ({ ...item, key: item.id }))}
+            loading={loading}
+          />
+        </Card>
+      </Spin>
+    </MainLayout>
   )
 }
 
