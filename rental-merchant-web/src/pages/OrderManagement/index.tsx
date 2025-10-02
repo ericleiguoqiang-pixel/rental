@@ -10,6 +10,9 @@ const { Search } = Input
 const OrderManagement: React.FC = () => {
   const { orders, loading, updateOrderStatus } = useOrders()
   
+  // 确保 orders 是数组
+  const orderList = Array.isArray(orders) ? orders : []
+  
   const handleStatusUpdate = async (id: string, status: string) => {
     try {
       await updateOrderStatus(id, status)
@@ -81,7 +84,7 @@ const OrderManagement: React.FC = () => {
     },
   ]
 
-  const mockData = orders
+  const mockData = orderList
 
   return (
     <MainLayout title="订单管理">

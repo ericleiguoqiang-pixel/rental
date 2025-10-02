@@ -24,7 +24,9 @@ export const useOrders = () => {
       setLoading(true)
       setError(null)
       const response = await orderAPI.getOrders()
-      setOrders(response.data || [])
+      // 确保返回的数据是数组格式
+      const orderList = Array.isArray(response?.data) ? response.data : []
+      setOrders(orderList)
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : '获取订单列表失败'
       setError(errorMsg)

@@ -1,13 +1,19 @@
-import React from 'react'
-import { Card, Table, Button, Space, Tag, Select, Input, Spin, Popconfirm } from 'antd'
+import React, { useState } from 'react'
+import { Card, Table, Button, Space, Tag, Select, Input, Spin, Popconfirm, message } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons'
 import MainLayout from '../../components/MainLayout'
+import VehicleFormModal from '../../components/VehicleFormModal'
 import { useVehicles, Vehicle } from '../../hooks/useVehicles'
 
 const { Search } = Input
 
 const VehicleManagement: React.FC = () => {
-  const { vehicles, loading, deleteVehicle } = useVehicles()
+  const { vehicles, loading, deleteVehicle, createVehicle, updateVehicle } = useVehicles()
+  const [modalVisible, setModalVisible] = useState(false)
+  const [editingVehicle, setEditingVehicle] = useState<Vehicle | undefined>(undefined)
+  
+  // 确保 vehicles 是数组
+  const vehicleList = Array.isArray(vehicles) ? vehicles : []
   
   const handleDelete = async (id: string) => {
     try {
@@ -15,6 +21,37 @@ const VehicleManagement: React.FC = () => {
     } catch (error) {
       // 错误信息已在 hook 中处理
     }
+  }
+
+  const handleAdd = () => {
+    setEditingVehicle(undefined)
+    setModalVisible(true)
+  }
+
+  const handleEdit = (vehicle: Vehicle) => {
+    setEditingVehicle(vehicle)
+    setModalVisible(true)
+  }
+
+  const handleModalSubmit = async (values: any) => {
+    try {
+      if (editingVehicle) {
+        await updateVehicle(editingVehicle.id, values)
+        message.success('车辆更新成功')
+      } else {
+        await createVehicle(values)
+        message.success('车辆创建成功')
+      }
+      setModalVisible(false)
+      setEditingVehicle(undefined)
+    } catch (error) {
+      // 错误信息已在 hook 中处理
+    }
+  }
+
+  const handleModalCancel = () => {
+    setModalVisible(false)
+    setEditingVehicle(undefined)
   }
   const columns = [
     {
@@ -63,7 +100,7 @@ const VehicleManagement: React.FC = () => {
       key: 'action',
       render: (_, record: Vehicle) => (
         <Space size="middle">
-          <Button type="link" icon={<EditOutlined />}>编辑</Button>
+          <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)}>编辑</Button>
           <Popconfirm
             title="删除车辆"
             description="确定要删除这辆车吗？"
@@ -78,7 +115,7 @@ const VehicleManagement: React.FC = () => {
     },
   ]
 
-  const mockData = vehicles
+  const mockData = vehicleList
 
   return (
     <MainLayout title="车辆管理">
@@ -94,7 +131,7 @@ const VehicleManagement: React.FC = () => {
                 <Select.Option value="rented">已租出</Select.Option>
                 <Select.Option value="maintenance">维护中</Select.Option>
               </Select>
-              <Button type="primary" icon={<PlusOutlined />}>新增车辆</Button>
+              <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增车辆</Button>
             </Space>
           }
         >
@@ -104,6 +141,14 @@ const VehicleManagement: React.FC = () => {
             loading={loading}
           />
         </Card>
+
+        <VehicleFormModal
+          visible={modalVisible}
+          onCancel={handleModalCancel}
+          onSubmit={handleModalSubmit}
+          initialValues={editingVehicle}
+          title={editingVehicle ? '编辑车辆' : '新增车辆'}
+        />
       </Spin>
     </MainLayout>
   )

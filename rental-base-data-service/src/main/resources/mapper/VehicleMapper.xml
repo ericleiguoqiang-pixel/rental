@@ -2,27 +2,93 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.rental.saas.basedata.mapper.VehicleMapper">
 
-    <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.rental.saas.basedata.entity.Vehicle">
-        <id column="id" property="id"/>
-        <result column="tenant_id" property="tenantId"/>
-        <result column="store_id" property="storeId"/>
-        <result column="license_plate" property="licensePlate"/>
-        <result column="car_model_id" property="carModelId"/>
-        <result column="license_type" property="licenseType"/>
-        <result column="register_date" property="registerDate"/>
-        <result column="vin" property="vin"/>
-        <result column="engine_no" property="engineNo"/>
-        <result column="usage_nature" property="usageNature"/>
-        <result column="audit_status" property="auditStatus"/>
-        <result column="online_status" property="onlineStatus"/>
-        <result column="vehicle_status" property="vehicleStatus"/>
-        <result column="mileage" property="mileage"/>
-        <result column="created_time" property="createdTime"/>
-        <result column="updated_time" property="updatedTime"/>
-        <result column="created_by" property="createdBy"/>
-        <result column="updated_by" property="updatedBy"/>
-        <result column="deleted" property="deleted"/>
-    </resultMap>
+    <!-- 根据租户ID查询车辆列表 -->
+    <select id="findByTenantId" resultType="com.rental.saas.basedata.entity.Vehicle">
+        SELECT * FROM vehicle 
+        WHERE tenant_id = #{tenantId} AND deleted = 0
+        ORDER BY created_time DESC
+    </select>
+
+    <!-- 根据门店ID查询车辆列表 -->
+    <select id="findByStoreId" resultType="com.rental.saas.basedata.entity.Vehicle">
+        SELECT * FROM vehicle 
+        WHERE store_id = #{storeId} AND deleted = 0
+        ORDER BY created_time DESC
+    </select>
+
+    <!-- 根据车型ID查询车辆列表 -->
+    <select id="findByCarModelId" resultType="com.rental.saas.basedata.entity.Vehicle">
+        SELECT * FROM vehicle 
+        WHERE car_model_id = #{carModelId} AND deleted = 0
+        ORDER BY created_time DESC
+    </select>
+
+    <!-- 查询可用车辆列表 -->
+    <select id="findAvailableVehicles" resultType="com.rental.saas.basedata.entity.Vehicle">
+        SELECT * FROM vehicle 
+        WHERE tenant_id = #{tenantId} 
+        AND audit_status = 1 
+        AND online_status = 1 
+        AND vehicle_status = 1 
+        AND deleted = 0
+        <if test="storeId != null">
+            AND store_id = #{storeId}
+        </if>
+        ORDER BY created_time DESC
+    </select>
+
+    <!-- 根据车牌号查询车辆 -->
+    <select id="findByLicensePlate" resultType="com.rental.saas.basedata.entity.Vehicle">
+        SELECT * FROM vehicle 
+        WHERE license_plate = #{licensePlate} AND tenant_id = #{tenantId} AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <!-- 根据车架号查询车辆 -->
+    <select id="findByVin" resultType="com.rental.saas.basedata.entity.Vehicle">
+        SELECT * FROM vehicle 
+        WHERE vin = #{vin} AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <!-- 统计门店车辆数量 -->
+    <select id="countByStoreId" resultType="int">
+        SELECT COUNT(*) FROM vehicle 
+        WHERE store_id = #{storeId} AND deleted = 0
+    </select>
+
+    <!-- 统计租户车辆数量 -->
+    <select id="countByTenantId" resultType="int">
+        SELECT COUNT(*) FROM vehicle 
+        WHERE tenant_id = #{tenantId} AND deleted = 0
+    </select>
+
+    <!-- 统计各状态车辆数量 -->
+    <select id="countByVehicleStatus" resultType="map">
+        SELECT 
+            vehicle_status,
+            COUNT(*) as count
+        FROM vehicle 
+        WHERE tenant_id = #{tenantId} AND deleted = 0
+        GROUP BY vehicle_status
+    </select>
+
+    <!-- 检查车牌号是否重复 -->
+    <select id="checkLicensePlateExists" resultType="int">
+        SELECT COUNT(*) FROM vehicle 
+        WHERE license_plate = #{licensePlate} AND deleted = 0
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
+
+    <!-- 检查车架号是否重复 -->
+    <select id="checkVinExists" resultType="int">
+        SELECT COUNT(*) FROM vehicle 
+        WHERE vin = #{vin} AND deleted = 0
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
 
 </mapper>

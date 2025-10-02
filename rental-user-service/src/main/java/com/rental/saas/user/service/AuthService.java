@@ -34,4 +34,9 @@ public interface AuthService {
      * 验证访问令牌
      */
     boolean verifyToken(String accessToken);
+    
+    /**
+     * 生成运营管理员令牌
+     */
+    LoginResponse generateOperationToken();
 }

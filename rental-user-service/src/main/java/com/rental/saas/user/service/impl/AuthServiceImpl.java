@@ -354,4 +354,45 @@ public class AuthServiceImpl implements AuthService {
         // 设置为令牌的剩余有效期
         redisTemplate.opsForValue().set(blacklistKey, "1", 2, TimeUnit.HOURS);
     }
+    
+    /**
+     * 生成运营管理员令牌
+     */
+    @Override
+    public LoginResponse generateOperationToken() {
+        // 构建运营管理员信息
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("employeeName", "运营管理员");
+        claims.put("roleType", "OPERATION_ADMIN");
+        claims.put("permissions", "merchant:audit,vehicle:audit,store:audit,dashboard:view");
+
+        // 生成访问令牌和刷新令牌
+        String accessToken = jwtUtil.generateAccessToken(
+            0L,  // 运营管理员ID设为0
+            "admin", 
+            0L,  // 运营管理员无租户
+            claims
+        );
+        String refreshToken = jwtUtil.generateRefreshToken(0L);
+
+        // 构建响应
+        LoginResponse response = new LoginResponse();
+        response.setAccessToken(accessToken);
+        response.setRefreshToken(refreshToken);
+        response.setTokenType("Bearer");
+        response.setExpiresIn(7200L); // 2小时
+
+        // 构建用户信息
+        LoginResponse.UserInfo userInfo = new LoginResponse.UserInfo();
+        userInfo.setUserId(0L);
+        userInfo.setUsername("admin");
+        userInfo.setEmployeeName("运营管理员");
+        userInfo.setTenantId(0L);
+        userInfo.setCompanyName("运营管理中心");
+        userInfo.setRoleType(99); // 运营管理员角色类型
+        userInfo.setRoleTypeDesc("运营管理员");
+
+        response.setUserInfo(userInfo);
+        return response;
+    }
 }

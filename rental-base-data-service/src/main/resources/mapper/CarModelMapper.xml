@@ -2,25 +2,108 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.rental.saas.basedata.mapper.CarModelMapper">
 
-    <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.rental.saas.basedata.entity.CarModel">
-        <id column="id" property="id"/>
-        <result column="brand" property="brand"/>
-        <result column="series" property="series"/>
-        <result column="model" property="model"/>
-        <result column="year" property="year"/>
-        <result column="transmission" property="transmission"/>
-        <result column="drive_type" property="driveType"/>
-        <result column="seat_count" property="seatCount"/>
-        <result column="door_count" property="doorCount"/>
-        <result column="category" property="category"/>
-        <result column="image_urls" property="imageUrls"/>
-        <result column="description" property="description"/>
-        <result column="created_time" property="createdTime"/>
-        <result column="updated_time" property="updatedTime"/>
-        <result column="created_by" property="createdBy"/>
-        <result column="updated_by" property="updatedBy"/>
-        <result column="deleted" property="deleted"/>
-    </resultMap>
+    <!-- 根据品牌查询车型 -->
+    <select id="findByBrand" resultType="com.rental.saas.basedata.entity.CarModel">
+        SELECT * FROM car_model 
+        WHERE brand = #{brand} AND deleted = 0
+        ORDER BY series, year DESC
+    </select>
+
+    <!-- 根据车系查询车型 -->
+    <select id="findBySeries" resultType="com.rental.saas.basedata.entity.CarModel">
+        SELECT * FROM car_model 
+        WHERE series = #{series} AND deleted = 0
+        ORDER BY brand, year DESC
+    </select>
+
+    <!-- 根据品牌和车系查询车型 -->
+    <select id="findByBrandAndSeries" resultType="com.rental.saas.basedata.entity.CarModel">
+        SELECT * FROM car_model 
+        WHERE brand = #{brand} AND series = #{series} AND deleted = 0
+        ORDER BY year DESC
+    </select>
+
+    <!-- 根据座位数查询车型 -->
+    <select id="findBySeatCount" resultType="com.rental.saas.basedata.entity.CarModel">
+        SELECT * FROM car_model 
+        WHERE seat_count = #{seatCount} AND deleted = 0
+        ORDER BY brand, series, year DESC
+    </select>
+
+    <!-- 根据档位类型查询车型 -->
+    <select id="findByTransmission" resultType="com.rental.saas.basedata.entity.CarModel">
+        SELECT * FROM car_model 
+        WHERE transmission = #{transmission} AND deleted = 0
+        ORDER BY brand, series, year DESC
+    </select>
+
+    <!-- 根据驱动类型查询车型 -->
+    <select id="findByDriveType" resultType="com.rental.saas.basedata.entity.CarModel">
+        SELECT * FROM car_model 
+        WHERE drive_type = #{driveType} AND deleted = 0
+        ORDER BY brand, series, year DESC
+    </select>
+
+    <!-- 根据年款范围查询车型 -->
+    <select id="findByYearRange" resultType="com.rental.saas.basedata.entity.CarModel">
+        SELECT * FROM car_model 
+        WHERE year BETWEEN #{startYear} AND #{endYear} AND deleted = 0
+        ORDER BY brand, series, year DESC
+    </select>
+
+    <!-- 查询所有品牌 -->
+    <select id="findAllBrands" resultType="string">
+        SELECT DISTINCT brand FROM car_model 
+        WHERE deleted = 0
+        ORDER BY brand
+    </select>
+
+    <!-- 根据品牌查询车系 -->
+    <select id="findSeriesByBrand" resultType="string">
+        SELECT DISTINCT series FROM car_model 
+        WHERE brand = #{brand} AND deleted = 0
+        ORDER BY series
+    </select>
+
+    <!-- 多条件查询车型 -->
+    <select id="findByConditions" resultType="com.rental.saas.basedata.entity.CarModel">
+        SELECT * FROM car_model 
+        WHERE deleted = 0
+        <if test="brand != null and brand != ''">
+            AND brand = #{brand}
+        </if>
+        <if test="series != null and series != ''">
+            AND series = #{series}
+        </if>
+        <if test="seatCount != null">
+            AND seat_count = #{seatCount}
+        </if>
+        <if test="transmission != null">
+            AND transmission = #{transmission}
+        </if>
+        <if test="driveType != null">
+            AND drive_type = #{driveType}
+        </if>
+        <if test="startYear != null">
+            AND year &gt;= #{startYear}
+        </if>
+        <if test="endYear != null">
+            AND year &lt;= #{endYear}
+        </if>
+        ORDER BY brand, series, year DESC
+    </select>
+
+    <!-- 检查车型是否重复 -->
+    <select id="checkCarModelExists" resultType="int">
+        SELECT COUNT(*) FROM car_model 
+        WHERE brand = #{brand} 
+        AND series = #{series} 
+        AND model = #{model} 
+        AND year = #{year} 
+        AND deleted = 0
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
 
 </mapper>

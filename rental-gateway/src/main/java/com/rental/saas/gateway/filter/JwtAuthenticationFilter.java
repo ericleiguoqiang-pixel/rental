@@ -36,7 +36,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     private static final List<String> WHITE_LIST = Arrays.asList(
             "/api/auth/login",
             "/api/auth/refresh",
+            "/api/auth/refresh",
+            "/api/auth/captcha",
             "/api/merchants/apply",
+            "/api/car-models",  // 车型查询API - 基础数据，无需认证
+            "/api/operation/auth/login", // 运营MIS登录接口
             "/actuator",
             "/v3/api-docs",
             "/swagger-ui"

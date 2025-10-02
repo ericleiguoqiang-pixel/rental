@@ -42,6 +42,17 @@ const Login: React.FC = () => {
   }
 
   useEffect(() => {
+    // 检查是否已登录，如果已登录则直接跳转
+    const token = localStorage.getItem('token')
+    const userInfo = localStorage.getItem('userInfo')
+    
+    if (token && userInfo) {
+      console.log('用户已登录，跳转到目标页面')
+      navigate(from, { replace: true })
+      return
+    }
+    
+    // 获取验证码
     fetchCaptcha()
   }, [])
 

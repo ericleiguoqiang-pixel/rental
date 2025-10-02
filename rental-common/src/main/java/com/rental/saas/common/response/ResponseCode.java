@@ -112,7 +112,10 @@ public enum ResponseCode {
     DATA_NOT_FOUND(11201, "数据不存在"),
     DATA_ALREADY_EXISTS(11202, "数据已存在"),
     DATA_INTEGRITY_VIOLATION(11203, "数据完整性违反"),
-    OPTIMISTIC_LOCK_FAILURE(11204, "乐观锁更新失败");
+    OPTIMISTIC_LOCK_FAILURE(11204, "乐观锁更新失败"),
+    
+    // 服务范围相关 113xx
+    SERVICE_AREA_NOT_FOUND(11301, "服务范围不存在");
 
     /**
      * 响应码

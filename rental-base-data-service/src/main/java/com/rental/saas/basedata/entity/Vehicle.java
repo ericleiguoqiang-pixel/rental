@@ -127,4 +127,25 @@ public class Vehicle extends TenantBaseEntity {
     @Min(value = 0, message = "总里程不能为负数")
     @Schema(description = "总里程", example = "50000")
     private Integer mileage;
+
+    /**
+     * 审核备注
+     */
+    @TableField("audit_remark")
+    @Schema(description = "审核备注", example = "材料齐全，准予通过")
+    private String auditRemark;
+
+    /**
+     * 审核时间
+     */
+    @TableField("audit_time")
+    @Schema(description = "审核时间", example = "2024-01-01 12:00:00")
+    private java.time.LocalDateTime auditTime;
+
+    /**
+     * 审核人ID
+     */
+    @TableField("auditor_id")
+    @Schema(description = "审核人ID", example = "1")
+    private Long auditorId;
 }

@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * 
  * @author Rental SaaS Team
  */
-@SpringBootApplication(scanBasePackages = {"com.rental.saas.common"})
+@SpringBootApplication(scanBasePackages = {"com.rental.saas.common", "com.rental.saas.gateway"})
 public class GatewayApplication {
 
     public static void main(String[] args) {

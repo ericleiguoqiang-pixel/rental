@@ -1,11 +1,19 @@
-import React from 'react'
-import { Card, Table, Button, Space, Tag, Statistic, Row, Col, Spin, Popconfirm } from 'antd'
+import React, { useState } from 'react'
+import { Card, Table, Button, Space, Tag, Statistic, Row, Col, Spin, Popconfirm, message } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import MainLayout from '../../components/MainLayout'
+import StoreFormModal from '../../components/StoreFormModal'
 import { useStores, Store } from '../../hooks/useStores'
+import StoreServiceAreaManagement from '../../components/StoreServiceAreaManagement'
 
 const StoreManagement: React.FC = () => {
-  const { stores, loading, deleteStore } = useStores()
+  const { stores, loading, deleteStore, createStore, updateStore } = useStores()
+  const [modalVisible, setModalVisible] = useState(false)
+  const [editingStore, setEditingStore] = useState<Store | undefined>(undefined)
+  const [serviceAreaStore, setServiceAreaStore] = useState<Store | undefined>(undefined)
+  
+  // 确保 stores 是数组
+  const storeList = Array.isArray(stores) ? stores : []
   
   const handleDelete = async (id: string) => {
     try {
@@ -14,15 +22,60 @@ const StoreManagement: React.FC = () => {
       // 错误信息已在 hook 中处理
     }
   }
+
+  const handleAdd = () => {
+    setEditingStore(undefined)
+    setModalVisible(true)
+  }
+
+  const handleEdit = (store: Store) => {
+    setEditingStore(store)
+    setModalVisible(true)
+  }
+
+  const handleManageServiceArea = (store: Store) => {
+    setServiceAreaStore(store)
+  }
+
+  const handleBackToStoreList = () => {
+    setServiceAreaStore(undefined)
+  }
+
+  const handleModalSubmit = async (values: any) => {
+    try {
+      if (editingStore) {
+        await updateStore(editingStore.id, values)
+        message.success('门店更新成功')
+      } else {
+        await createStore(values)
+        message.success('门店创建成功')
+      }
+      setModalVisible(false)
+      setEditingStore(undefined)
+    } catch (error) {
+      // 错误信息已在 hook 中处理
+    }
+  }
+
+  const handleModalCancel = () => {
+    setModalVisible(false)
+    setEditingStore(undefined)
+  }
   
-  const activeStores = stores.filter(store => store.status === 'active').length
-  const inactiveStores = stores.filter(store => store.status === 'inactive').length
+  const activeStores = storeList.filter(store => store.onlineStatus === 1 || store.status === 'active').length
+  const inactiveStores = storeList.filter(store => store.onlineStatus === 0 || store.status === 'inactive').length
   const totalRevenue = 128000 // 这个需要从另外的API获取
   const columns = [
     {
       title: '门店名称',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'storeName',
+      key: 'storeName',
+      render: (text: string, record: Store) => record.storeName || record.name || text
+    },
+    {
+      title: '城市',
+      dataIndex: 'city',
+      key: 'city',
     },
     {
       title: '门店地址',
@@ -33,23 +86,30 @@ const StoreManagement: React.FC = () => {
       title: '联系电话',
       dataIndex: 'phone',
       key: 'phone',
+      render: (phone: string) => phone || '暂无'
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => (
-        <Tag color={status === 'active' ? 'green' : 'red'}>
-          {status === 'active' ? '营业中' : '暂停营业'}
-        </Tag>
-      ),
+      render: (status: string, record: Store) => {
+        // 优先使用 onlineStatusDesc，其次使用 status
+        const isActive = record.onlineStatus === 1 || status === 'active'
+        const statusText = record.onlineStatusDesc || (isActive ? '上架' : '下架')
+        return (
+          <Tag color={isActive ? 'green' : 'red'}>
+            {statusText}
+          </Tag>
+        )
+      },
     },
     {
       title: '操作',
       key: 'action',
       render: (_, record: Store) => (
         <Space size="middle">
-          <Button type="link" icon={<EditOutlined />}>编辑</Button>
+          <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)}>编辑</Button>
+          <Button type="link" onClick={() => handleManageServiceArea(record)}>服务范围管理</Button>
           <Popconfirm
             title="删除门店"
             description="确定要删除这个门店吗？"
@@ -64,7 +124,22 @@ const StoreManagement: React.FC = () => {
     },
   ]
 
-  const mockData = stores
+  const mockData = storeList
+
+  // 如果选择了门店进行服务范围管理，则显示服务范围管理界面
+  if (serviceAreaStore) {
+    return (
+      <MainLayout title="门店管理">
+        <Button onClick={handleBackToStoreList} style={{ marginBottom: 16 }}>
+          ← 返回门店列表
+        </Button>
+        <StoreServiceAreaManagement 
+          storeId={serviceAreaStore.id} 
+          storeName={serviceAreaStore.storeName || serviceAreaStore.name || ''} 
+        />
+      </MainLayout>
+    )
+  }
 
   return (
     <MainLayout title="门店管理">
@@ -72,17 +147,17 @@ const StoreManagement: React.FC = () => {
         <Row gutter={16} style={{ marginBottom: 24 }}>
           <Col span={6}>
             <Card>
-              <Statistic title="门店总数" value={stores.length} />
+              <Statistic title="门店总数" value={storeList.length} />
             </Card>
           </Col>
           <Col span={6}>
             <Card>
-              <Statistic title="营业中门店" value={activeStores} />
+              <Statistic title="上架门店" value={activeStores} />
             </Card>
           </Col>
           <Col span={6}>
             <Card>
-              <Statistic title="暂停营业" value={inactiveStores} />
+              <Statistic title="下架门店" value={inactiveStores} />
             </Card>
           </Col>
           <Col span={6}>
@@ -94,7 +169,7 @@ const StoreManagement: React.FC = () => {
 
         <Card 
           title="门店列表" 
-          extra={<Button type="primary" icon={<PlusOutlined />}>新增门店</Button>}
+          extra={<Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增门店</Button>}
         >
           <Table 
             columns={columns} 
@@ -102,6 +177,14 @@ const StoreManagement: React.FC = () => {
             loading={loading}
           />
         </Card>
+
+        <StoreFormModal
+          visible={modalVisible}
+          onCancel={handleModalCancel}
+          onSubmit={handleModalSubmit}
+          initialValues={editingStore}
+          title={editingStore ? '编辑门店' : '新增门店'}
+        />
       </Spin>
     </MainLayout>
   )

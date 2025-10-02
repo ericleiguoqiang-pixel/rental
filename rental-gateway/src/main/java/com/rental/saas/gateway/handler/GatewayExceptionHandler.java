@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Component
 @Order(-1)
-public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
+public class GatewayExceptionHandler implements ErrorWebExceptionHandler {
 
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {

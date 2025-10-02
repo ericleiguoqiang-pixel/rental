@@ -1,5 +1,6 @@
 package com.rental.saas.common.response;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -79,6 +80,18 @@ public class PageResponse<T> implements Serializable {
      */
     public static <T> PageResponse<T> of(Integer pageNum, Integer pageSize, Long total, List<T> records) {
         return new PageResponse<>(pageNum, pageSize, total, records);
+    }
+
+    /**
+     * 从MyBatis Plus的IPage创建分页响应
+     */
+    public static <T> PageResponse<T> of(IPage<T> page) {
+        return new PageResponse<>(
+            (int) page.getCurrent(), 
+            (int) page.getSize(), 
+            page.getTotal(), 
+            page.getRecords()
+        );
     }
 
     /**
