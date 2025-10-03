@@ -6,7 +6,7 @@
 -- ===================================================================
 
 -- 创建数据库
-CREATE DATABASE IF NOT EXISTS `rental_saas` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS `rentalsaas` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `rental_saas`;
 
 -- ===================================================================

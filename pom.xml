@@ -20,6 +20,7 @@
         <module>rental-product-service</module>
         <module>rental-order-service</module>
         <module>rental-payment-service</module>
+        <module>rental-api</module>
     </modules>
 
     <properties>
@@ -153,6 +154,12 @@
                 <groupId>com.github.xiaoymin</groupId>
                 <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
                 <version>${knife4j.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-ui</artifactId>
+                <version>1.6.14</version>
             </dependency>
             
             <!-- 测试相关 -->

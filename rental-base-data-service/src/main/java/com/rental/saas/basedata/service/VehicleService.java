@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rental.saas.basedata.dto.request.VehicleCreateRequest;
 import com.rental.saas.basedata.dto.request.VehicleUpdateRequest;
-import com.rental.saas.basedata.dto.response.VehicleResponse;
+import com.rental.api.basedata.response.VehicleResponse;
 import com.rental.saas.basedata.entity.Vehicle;
 
 import java.util.List;
@@ -41,7 +41,7 @@ public interface VehicleService {
      * 分页查询车辆列表
      */
     Page<VehicleResponse> getVehicleList(int current, int size, Long storeId, Long carModelId,
-                                         Integer vehicleStatus, Integer auditStatus, 
+                                         Integer vehicleStatus, Integer auditStatus,
                                          Integer onlineStatus, Long tenantId);
 
     /**

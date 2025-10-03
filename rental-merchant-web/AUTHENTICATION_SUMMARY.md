@@ -31,21 +31,18 @@
 - 注册成功页面和流程指引
 
 ### 2. 商户审核管理
-- **审核列表管理**：查看所有商户申请
-- **详细信息查看**：完整的商户资料展示
-- **审核操作**：通过/拒绝审核，添加审核意见
-- **状态管理**：待审核、已通过、已拒绝、审核中
+商户审核功能已移至运营MIS系统中处理，商户SaaS系统不再提供此功能。
 
 ## 🔧 技术特性
 
 ### API 集成
-- 商户注册 API: `POST /api/merchant/register`
-- 商户申请列表 API: `GET /api/merchant/applications`
-- 审核操作 API: `PUT /api/merchant/applications/{id}/audit`
+- 商户注册 API: `POST /api/merchants/apply`
+- 商户申请列表 API: `GET /api/merchants/applications`
+- 审核操作 API: `PUT /api/merchants/applications/{id}/audit`
 - Token 验证 API: `POST /api/auth/verify`
 
 ### 数据管理 Hook
-- **`useMerchantAudit`**: 商户审核数据管理
+- **`useMerchantAudit`**: 商户审核数据管理（已移至运营MIS系统）
 - 自动 API 调用和错误处理
 - Mock 数据降级支持
 
@@ -67,7 +64,6 @@
 - `/stores` - 门店管理
 - `/vehicles` - 车辆管理
 - `/orders` - 订单管理
-- `/merchant-audit` - 商户审核（新增）
 
 ## 🛡️ 安全机制
 
@@ -91,7 +87,6 @@
 - [x] 用户登录认证
 - [x] 路由守卫和保护
 - [x] 商户注册流程
-- [x] 商户审核管理
 - [x] Token 验证和管理
 - [x] 错误处理和降级
 - [x] 响应式界面设计

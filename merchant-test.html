@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>商户注册测试</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>商户注册测试</h1>
+    <button onclick="testMerchantRegister()">测试商户注册</button>
+    <div id="result"></div>
+
+    <script>
+        async function testMerchantRegister() {
+            const testData = {
+                companyName: "测试汽车租赁有限公司",
+                businessLicense: "91110000MA1234567X",
+                legalPerson: "张三",
+                contactPhone: "13800138001",
+                contactEmail: "test@example.com",
+                businessAddress: "北京市朝阳区测试地址",
+                businessScope: "汽车租赁服务",
+                registeredCapital: "500",
+                establishedDate: "2020-01-01",
+                contactPersonName: "李四",
+                contactPersonPhone: "13800138002",
+                contactPersonEmail: "contact@test.com",
+                username: "testmerchant",
+                password: "Test123456",
+                confirmPassword: "Test123456"
+            };
+
+            try {
+                const response = await fetch('http://localhost:3001/api/merchants/apply', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Tenant-Id': '1'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                const result = await response.json();
+                document.getElementById('result').innerHTML = 
+                    '<h2>请求结果:</h2>' + 
+                    '<p>状态码: ' + response.status + '</p>' + 
+                    '<p>响应: ' + JSON.stringify(result, null, 2) + '</p>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    '<h2>请求失败:</h2>' + 
+                    '<p>错误: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>商户注册表单测试</title>
+    <meta charset="UTF-8">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>商户注册表单测试</h1>
+    <form id="merchantForm">
+        <h2>基本信息</h2>
+        <label>企业名称: <input type="text" name="companyName" value="测试汽车租赁有限公司" required></label><br><br>
+        <label>统一社会信用代码: <input type="text" name="businessLicense" value="91110000MA1234567X" required></label><br><br>
+        <label>法定代表人: <input type="text" name="legalPerson" value="张三" required></label><br><br>
+        <label>法人身份证号: <input type="text" name="legalPersonIdCard" value="110101199001010001" required></label><br><br>
+        <label>企业联系电话: <input type="text" name="contactPhone" value="13800138001" required></label><br><br>
+        <label>企业邮箱: <input type="email" name="contactEmail" value="test@example.com" required></label><br><br>
+
+        <h2>详细资料</h2>
+        <label>经营地址: <input type="text" name="businessAddress" value="北京市朝阳区测试地址" required></label><br><br>
+        <label>经营范围: <input type="text" name="businessScope" value="汽车租赁服务" required></label><br><br>
+        <label>注册资本: <input type="text" name="registeredCapital" value="500" required></label><br><br>
+        <label>成立日期: <input type="date" name="establishedDate" value="2020-01-01" required></label><br><br>
+
+        <h2>联系人信息</h2>
+        <label>联系人姓名: <input type="text" name="contactPersonName" value="李四" required></label><br><br>
+        <label>联系人电话: <input type="text" name="contactPersonPhone" value="13800138002" required></label><br><br>
+        <label>联系人邮箱: <input type="email" name="contactPersonEmail" value="contact@test.com" required></label><br><br>
+
+        <h2>平台账户信息</h2>
+        <label>登录用户名: <input type="text" name="username" value="testmerchant" required></label><br><br>
+        <label>登录密码: <input type="password" name="password" value="Test123456" required></label><br><br>
+        <label>确认密码: <input type="password" name="confirmPassword" value="Test123456" required></label><br><br>
+
+        <button type="button" onclick="submitForm()">提交表单</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        async function submitForm() {
+            const form = document.getElementById('merchantForm');
+            const formData = new FormData(form);
+            const values = {};
+            for (let [key, value] of formData.entries()) {
+                values[key] = value;
+            }
+
+            // 显示收集到的表单数据
+            console.log('收集到的表单数据:', values);
+            document.getElementById('result').innerHTML = '<h2>收集到的表单数据:</h2><pre>' + JSON.stringify(values, null, 2) + '</pre>';
+
+            // 构造发送到后端的数据
+            const requestData = {
+                companyName: values.companyName,
+                unifiedSocialCreditCode: values.businessLicense,
+                legalPersonName: values.legalPerson,
+                legalPersonIdCard: values.legalPersonIdCard,
+                contactName: values.contactPersonName,
+                contactPhone: values.contactPersonPhone,
+                companyAddress: values.businessAddress,
+                businessLicenseUrl: "",
+                transportLicenseUrl: ""
+            };
+
+            console.log('发送到后端的数据:', requestData);
+            document.getElementById('result').innerHTML += '<h2>发送到后端的数据:</h2><pre>' + JSON.stringify(requestData, null, 2) + '</pre>';
+
+            try {
+                // 发送请求到后端
+                const response = await axios.post('http://localhost:3001/api/merchants/apply', requestData, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Tenant-Id': '1'
+                    }
+                });
+
+                document.getElementById('result').innerHTML += '<h2>请求成功:</h2><pre>' + JSON.stringify(response.data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('result').innerHTML += '<h2>请求失败:</h2><pre>' + JSON.stringify(error.response?.data || error.message, null, 2) + '</pre>';
+            }
+        }
+    </script>
+</body>
+</html>

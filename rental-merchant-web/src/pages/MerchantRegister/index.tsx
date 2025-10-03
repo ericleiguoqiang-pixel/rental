@@ -14,6 +14,7 @@ interface MerchantRegisterForm {
   companyName: string
   businessLicense: string
   legalPerson: string
+  legalPersonIdCard: string
   contactPhone: string
   contactEmail: string
   
@@ -27,6 +28,10 @@ interface MerchantRegisterForm {
   contactPersonName: string
   contactPersonPhone: string
   contactPersonEmail: string
+  
+  // 证件信息
+  businessLicenseUrl?: string
+  transportLicenseUrl?: string
   
   // 平台账户信息
   username: string
@@ -66,10 +71,24 @@ const MerchantRegister: React.FC = () => {
     }
 
     setLoading(true)
+    
+    // 将前端表单字段映射到后端DTO字段
+    const requestData = {
+      companyName: values.companyName,
+      unifiedSocialCreditCode: values.businessLicense,
+      legalPersonName: values.legalPerson,
+      legalPersonIdCard: values.legalPersonIdCard,
+      contactName: values.contactPersonName,
+      contactPhone: values.contactPersonPhone,
+      companyAddress: values.businessAddress,
+      businessLicenseUrl: values.businessLicenseUrl || '',
+      transportLicenseUrl: values.transportLicenseUrl || ''
+    };
+
     try {
-      const response = await request('/merchant/register', {
+      const response = await request('/merchants/apply', {
         method: 'POST',
-        body: JSON.stringify(values),
+        body: JSON.stringify(requestData),
       })
 
       if (response.code === 200) {
@@ -86,12 +105,22 @@ const MerchantRegister: React.FC = () => {
     }
   }
 
+  // 定义每个步骤需要验证的字段
+  const stepFields = [
+    ['companyName', 'businessLicense', 'legalPerson', 'legalPersonIdCard', 'contactPhone', 'contactEmail'],
+    ['businessAddress', 'businessScope', 'registeredCapital', 'establishedDate'],
+    ['contactPersonName', 'contactPersonPhone', 'contactPersonEmail'],
+    ['username', 'password', 'confirmPassword']
+  ];
+
   const next = async () => {
     try {
-      const values = await form.validateFields()
-      setCurrentStep(currentStep + 1)
+      // 只验证当前步骤的字段
+      const fieldsToValidate = stepFields[currentStep];
+      await form.validateFields(fieldsToValidate);
+      setCurrentStep(currentStep + 1);
     } catch (errorInfo) {
-      console.log('验证失败:', errorInfo)
+      console.log('验证失败:', errorInfo);
     }
   }
 
@@ -99,11 +128,27 @@ const MerchantRegister: React.FC = () => {
     setCurrentStep(currentStep - 1)
   }
 
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <>
+  return (
+    <div className="merchant-register-container">
+      <Card className="register-form-card">
+        <Title level={2} style={{ textAlign: 'center', marginBottom: 32 }}>
+          商户入住申请
+        </Title>
+
+        <Steps current={currentStep} style={{ marginBottom: 32 }}>
+          {steps.map(item => (
+            <Step key={item.title} title={item.title} description={item.description} />
+          ))}
+        </Steps>
+
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={onFinish}
+          style={{ maxWidth: 600, margin: '0 auto' }}
+        >
+          {/* 渲染所有步骤的表单字段，但只显示当前步骤的字段 */}
+          <div style={{ display: currentStep === 0 ? 'block' : 'none' }}>
             <Form.Item
               label="企业名称"
               name="companyName"
@@ -132,6 +177,17 @@ const MerchantRegister: React.FC = () => {
             </Form.Item>
 
             <Form.Item
+              label="法人身份证号"
+              name="legalPersonIdCard"
+              rules={[
+                { required: true, message: '请输入法人身份证号' },
+                { pattern: /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/, message: '请输入正确的身份证号' }
+              ]}
+            >
+              <Input placeholder="请输入法人身份证号" />
+            </Form.Item>
+
+            <Form.Item
               label="企业联系电话"
               name="contactPhone"
               rules={[
@@ -141,7 +197,7 @@ const MerchantRegister: React.FC = () => {
             >
               <Input placeholder="请输入11位手机号码" />
             </Form.Item>
-
+            
             <Form.Item
               label="企业邮箱"
               name="contactEmail"
@@ -152,12 +208,9 @@ const MerchantRegister: React.FC = () => {
             >
               <Input placeholder="请输入企业邮箱地址" />
             </Form.Item>
-          </>
-        )
+          </div>
 
-      case 1:
-        return (
-          <>
+          <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
             <Form.Item
               label="经营地址"
               name="businessAddress"
@@ -189,12 +242,9 @@ const MerchantRegister: React.FC = () => {
             >
               <Input type="date" />
             </Form.Item>
-          </>
-        )
+          </div>
 
-      case 2:
-        return (
-          <>
+          <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
             <Form.Item
               label="联系人姓名"
               name="contactPersonName"
@@ -224,12 +274,9 @@ const MerchantRegister: React.FC = () => {
             >
               <Input placeholder="请输入联系人邮箱" />
             </Form.Item>
-          </>
-        )
+          </div>
 
-      case 3:
-        return (
-          <>
+          <div style={{ display: currentStep === 3 ? 'block' : 'none' }}>
             <Form.Item
               label="登录用户名"
               name="username"
@@ -271,34 +318,7 @@ const MerchantRegister: React.FC = () => {
             >
               <Input.Password placeholder="请再次输入密码" />
             </Form.Item>
-          </>
-        )
-
-      default:
-        return null
-    }
-  }
-
-  return (
-    <div className="merchant-register-container">
-      <Card className="register-form-card">
-        <Title level={2} style={{ textAlign: 'center', marginBottom: 32 }}>
-          商户入住申请
-        </Title>
-
-        <Steps current={currentStep} style={{ marginBottom: 32 }}>
-          {steps.map(item => (
-            <Step key={item.title} title={item.title} description={item.description} />
-          ))}
-        </Steps>
-
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={onFinish}
-          style={{ maxWidth: 600, margin: '0 auto' }}
-        >
-          {renderStepContent()}
+          </div>
 
           <Form.Item style={{ marginTop: 32 }}>
             <Row gutter={16}>

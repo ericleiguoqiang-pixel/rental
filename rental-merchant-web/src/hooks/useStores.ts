@@ -32,43 +32,16 @@ export const useStores = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // 数据转换函数：将后端数据转换为前端需要的格式
-  const transformStoreData = (backendData: any[]): Store[] => {
-    return backendData.map((item: any) => ({
-      id: String(item.id || ''),
-      storeName: item.storeName || '',
-      name: item.storeName || '', // 前端展示用
-      city: item.city || '',
-      address: item.address || '',
-      longitude: item.longitude,
-      latitude: item.latitude,
-      businessStartTime: item.businessStartTime,
-      businessEndTime: item.businessEndTime,
-      auditStatus: item.auditStatus,
-      auditStatusDesc: item.auditStatusDesc,
-      onlineStatus: item.onlineStatus,
-      onlineStatusDesc: item.onlineStatusDesc,
-      minAdvanceHours: item.minAdvanceHours,
-      maxAdvanceDays: item.maxAdvanceDays,
-      serviceFee: item.serviceFee,
-      vehicleCount: item.vehicleCount,
-      createdTime: item.createdTime,
-      updatedTime: item.updatedTime,
-      // 前端展示字段
-      phone: '暂无', // 后端暂无此字段
-      status: item.onlineStatus === 1 ? 'active' : 'inactive' as 'active' | 'inactive'
-    }))
-  }
-
   const fetchStores = async () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await storeAPI.getStores()
-      console.log('门店API返回数据:', response)
+      
+      // 调用API获取门店列表
+      const response: any = await storeAPI.getStores()
       
       // 检查响应数据结构
-      let storeData = []
+      let storeData: Store[] = []
       if (response?.data) {
         // 如果是分页格式，取 records 字段
         if (response.data.records && Array.isArray(response.data.records)) {
@@ -80,38 +53,16 @@ export const useStores = () => {
         }
       }
       
-      console.log('解析后的门店数据:', storeData)
+      // 数据转换：确保字段名匹配
+      const convertedStores = storeData.map(store => ({
+        ...store,
+        // 确保有 name 字段（用于前端显示）
+        name: store.storeName || store.name || '',
+        // 状态转换
+        status: store.onlineStatus === 1 ? 'active' as const : 'inactive' as const
+      }))
       
-      if (storeData.length > 0) {
-        const transformedData = transformStoreData(storeData)
-        console.log('转换后的门店数据:', transformedData)
-        setStores(transformedData)
-      } else {
-        console.warn('门店数据为空，使用Mock数据')
-        // 使用mock数据
-        setStores([
-          {
-            id: '1',
-            storeName: '总店',
-            name: '总店',
-            city: '上海',
-            address: '上海市浦东新区陆家嘴金融中心',
-            phone: '021-12345678',
-            status: 'active',
-            onlineStatus: 1,
-          },
-          {
-            id: '2',
-            storeName: '虹桥分店',
-            name: '虹桥分店',
-            city: '上海',
-            address: '上海市长宁区虹桥路1号',
-            phone: '021-87654321',
-            status: 'active',
-            onlineStatus: 1,
-          },
-        ])
-      }
+      setStores(convertedStores)
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : '获取门店列表失败'
       setError(errorMsg)
@@ -189,6 +140,38 @@ export const useStores = () => {
     }
   }
 
+  // 添加门店上架功能
+  const onlineStore = async (id: string) => {
+    try {
+      setLoading(true)
+      await storeAPI.onlineStore(id)
+      message.success('门店上架成功')
+      await fetchStores() // 重新获取列表
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : '门店上架失败'
+      message.error(errorMsg)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 添加门店下架功能
+  const offlineStore = async (id: string) => {
+    try {
+      setLoading(true)
+      await storeAPI.offlineStore(id)
+      message.success('门店下架成功')
+      await fetchStores() // 重新获取列表
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : '门店下架失败'
+      message.error(errorMsg)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     fetchStores()
   }, [])
@@ -201,5 +184,7 @@ export const useStores = () => {
     createStore,
     updateStore,
     deleteStore,
+    onlineStore,    // 导出上架功能
+    offlineStore,   // 导出下架功能
   }
 }

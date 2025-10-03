@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试门店位置选择</title>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=YOUR_AMAP_KEY"></script>
+</head>
+<body>
+    <h1>测试门店位置选择组件</h1>
+    <button onclick="showLocationPicker()">显示位置选择器</button>
+    <div id="result"></div>
+
+    <script>
+        // 模拟 React 组件的简化版本
+        function showLocationPicker() {
+            alert("在实际应用中，这里会显示高德地图位置选择器");
+            
+            // 模拟选中位置
+            const mockLocation = {
+                longitude: 116.397428,
+                latitude: 39.90923
+            };
+            
+            document.getElementById('result').innerHTML = 
+                `<h2>选中的位置：</h2>
+                 <p>经度: ${mockLocation.longitude.toFixed(6)}</p>
+                 <p>纬度: ${mockLocation.latitude.toFixed(6)}</p>`;
+        }
+    </script>
+</body>
+</html>

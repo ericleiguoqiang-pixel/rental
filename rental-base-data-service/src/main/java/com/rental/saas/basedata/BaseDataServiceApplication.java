@@ -4,13 +4,14 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  * 基础数据服务启动类
  * 
  * @author Rental SaaS Team
  */
-@SpringBootApplication(scanBasePackages = {"com.rental.saas.common", "com.rental.saas.basedata"})
+@SpringBootApplication(scanBasePackages = {"com.rental.saas.common", "com.rental.api", "com.rental.saas.basedata"})
 @EnableDiscoveryClient
 @MapperScan("com.rental.saas.basedata.mapper")
 public class BaseDataServiceApplication {

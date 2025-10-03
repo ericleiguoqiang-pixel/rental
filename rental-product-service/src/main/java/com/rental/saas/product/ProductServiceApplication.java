@@ -3,14 +3,16 @@ package com.rental.saas.product;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  * 商品服务启动类
  * 
  * @author Rental SaaS Team
  */
-@SpringBootApplication(scanBasePackages = {"com.rental.saas.common", "com.rental.saas.product"})
+@SpringBootApplication(scanBasePackages = {"com.rental.saas.common", "com.rental.api", "com.rental.saas.product"})
 @EnableDiscoveryClient
+@EnableFeignClients(basePackages = {"com.rental.api"})
 public class ProductServiceApplication {
 
     public static void main(String[] args) {

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试门店上架下架功能</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .store-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .store-name {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .store-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            color: white;
+        }
+        .status-online {
+            background-color: green;
+        }
+        .status-offline {
+            background-color: red;
+        }
+        button {
+            padding: 8px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .btn-online {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-offline {
+            background-color: #f44336;
+            color: white;
+        }
+        .btn-edit {
+            background-color: #2196F3;
+            color: white;
+        }
+        .btn-delete {
+            background-color: #9E9E9E;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>门店管理测试页面</h1>
+    
+    <div class="store-item">
+        <div class="store-name">北京朝阳门店</div>
+        <p>地址：北京市朝阳区某某街道某某号</p>
+        <p>城市：北京</p>
+        <span class="store-status status-online">上架</span>
+        <div>
+            <button class="btn-offline" onclick="offlineStore('1')">下架</button>
+            <button class="btn-edit" onclick="editStore('1')">编辑</button>
+            <button class="btn-delete" onclick="deleteStore('1')">删除</button>
+        </div>
+    </div>
+    
+    <div class="store-item">
+        <div class="store-name">上海浦东门店</div>
+        <p>地址：上海市浦东新区某某路某某号</p>
+        <p>城市：上海</p>
+        <span class="store-status status-offline">下架</span>
+        <div>
+            <button class="btn-online" onclick="onlineStore('2')">上架</button>
+            <button class="btn-edit" onclick="editStore('2')">编辑</button>
+            <button class="btn-delete" onclick="deleteStore('2')">删除</button>
+        </div>
+    </div>
+    
+    <div style="margin-top: 20px;">
+        <button onclick="addStore()">新增门店</button>
+    </div>
+
+    <script>
+        function onlineStore(id) {
+            alert(`门店 ${id} 上架成功`);
+            // 在实际应用中，这里会调用API并更新UI
+        }
+        
+        function offlineStore(id) {
+            alert(`门店 ${id} 下架成功`);
+            // 在实际应用中，这里会调用API并更新UI
+        }
+        
+        function editStore(id) {
+            alert(`编辑门店 ${id}`);
+            // 在实际应用中，这里会打开编辑模态框
+        }
+        
+        function deleteStore(id) {
+            if (confirm(`确定要删除门店 ${id} 吗？`)) {
+                alert(`门店 ${id} 删除成功`);
+                // 在实际应用中，这里会调用API并更新UI
+            }
+        }
+        
+        function addStore() {
+            alert('新增门店');
+            // 在实际应用中，这里会打开新增模态框
+        }
+    </script>
+</body>
+</html>

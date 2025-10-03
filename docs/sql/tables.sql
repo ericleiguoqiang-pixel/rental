@@ -5,6 +5,7 @@
 -- 增值服务模板表
 CREATE TABLE `value_added_service_template` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '模板ID',
+    `tenant_id` BIGINT NOT NULL COMMENT '租户ID',
     `template_name` VARCHAR(100) NOT NULL COMMENT '模板名称',
     `service_type` TINYINT NOT NULL COMMENT '服务类型:1-基础保障,2-优享保障,3-尊享保障',
     `price` INT NOT NULL COMMENT '价格(分)',
@@ -17,6 +18,8 @@ CREATE TABLE `value_added_service_template` (
     `depreciation_rate` INT NOT NULL DEFAULT 0 COMMENT '折旧费收取比例(%)',
     `created_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `created_by` BIGINT COMMENT '创建人',
+    `updated_by` BIGINT COMMENT '更新人',
     `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除:0-正常,1-删除',
     PRIMARY KEY (`id`),
     KEY `idx_service_type` (`service_type`)
@@ -25,11 +28,14 @@ CREATE TABLE `value_added_service_template` (
 -- 取消规则模板表
 CREATE TABLE `cancellation_rule_template` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '模板ID',
+    `tenant_id` BIGINT NOT NULL COMMENT '租户ID',
     `template_name` VARCHAR(100) NOT NULL COMMENT '模板名称',
     `weekday_rule` TEXT NOT NULL COMMENT '平日取消规则',
     `holiday_rule` TEXT NOT NULL COMMENT '节假日取消规则',
     `created_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `created_by` BIGINT COMMENT '创建人',
+    `updated_by` BIGINT COMMENT '更新人',
     `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除:0-正常,1-删除',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='取消规则模板表';
@@ -37,6 +43,7 @@ CREATE TABLE `cancellation_rule_template` (
 -- 服务政策模板表
 CREATE TABLE `service_policy_template` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '模板ID',
+    `tenant_id` BIGINT NOT NULL COMMENT '租户ID',
     `template_name` VARCHAR(100) NOT NULL COMMENT '模板名称',
     `mileage_limit` TEXT COMMENT '里程限制',
     `early_pickup` TEXT COMMENT '提前取车',
@@ -57,6 +64,8 @@ CREATE TABLE `service_policy_template` (
     `invoice_info` TEXT COMMENT '发票说明',
     `created_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `created_by` BIGINT COMMENT '创建人',
+    `updated_by` BIGINT COMMENT '更新人',
     `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除:0-正常,1-删除',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='服务政策模板表';
@@ -77,6 +86,8 @@ CREATE TABLE `car_model_product` (
     `weekend_definition` VARCHAR(50) NOT NULL DEFAULT '6,7' COMMENT '周末定义',
     `tags` VARCHAR(200) COMMENT '车型标签(JSON格式)',
     `vas_template_id` BIGINT COMMENT '增值服务模板ID',
+    `vas_template_id_vip` bigint not null default 0 comment '优享保障模板ID',
+    `vas_template_id_vvip` bigint not null default 0 comment '尊享保障模板ID',
     `cancellation_template_id` BIGINT COMMENT '取消规则模板ID',
     `service_policy_template_id` BIGINT COMMENT '服务政策模板ID',
     `online_status` TINYINT NOT NULL DEFAULT 0 COMMENT '上架状态:0-下架,1-上架',
@@ -95,9 +106,14 @@ CREATE TABLE `car_model_product` (
 -- 车型商品关联车辆表
 CREATE TABLE `product_vehicle_relation` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `tenant_id` BIGINT NOT NULL COMMENT '租户ID',
     `product_id` BIGINT NOT NULL COMMENT '商品ID',
     `vehicle_id` BIGINT NOT NULL COMMENT '车辆ID',
     `created_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `created_by` BIGINT COMMENT '创建人',
+    `updated_by` BIGINT COMMENT '更新人',
+    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除:0-正常,1-删除',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_product_vehicle` (`product_id`, `vehicle_id`),
     KEY `idx_product_id` (`product_id`),

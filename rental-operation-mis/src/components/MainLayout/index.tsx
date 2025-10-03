@@ -12,6 +12,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   SafetyCertificateOutlined,
+  DatabaseOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuthStore } from '../../hooks/useAuth';
@@ -38,6 +39,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '运营概览
     if (path === '/merchant-audit') return ['merchant-audit'];
     if (path === '/vehicle-audit') return ['vehicle-audit'];
     if (path === '/store-audit') return ['store-audit'];
+    if (path === '/car-models') return ['car-models'];
     return ['dashboard'];
   };
 
@@ -68,6 +70,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '运营概览
         break;
       case 'store-audit':
         navigate('/store-audit');
+        break;
+      case 'car-models':
+        navigate('/car-models');
         break;
       default:
         break;
@@ -112,6 +117,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '运营概览
           label: '门店审核',
         },
       ],
+    },
+    {
+      key: 'car-models',
+      icon: <DatabaseOutlined />,
+      label: '车型管理',
     },
   ];
 

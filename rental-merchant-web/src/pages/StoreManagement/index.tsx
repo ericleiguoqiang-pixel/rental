@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { Card, Table, Button, Space, Tag, Statistic, Row, Col, Spin, Popconfirm, message } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined, UpOutlined, DownOutlined } from '@ant-design/icons'
 import MainLayout from '../../components/MainLayout'
 import StoreFormModal from '../../components/StoreFormModal'
 import { useStores, Store } from '../../hooks/useStores'
 import StoreServiceAreaManagement from '../../components/StoreServiceAreaManagement'
 
 const StoreManagement: React.FC = () => {
-  const { stores, loading, deleteStore, createStore, updateStore } = useStores()
+  const { stores, loading, deleteStore, createStore, updateStore, onlineStore, offlineStore } = useStores()
   const [modalVisible, setModalVisible] = useState(false)
   const [editingStore, setEditingStore] = useState<Store | undefined>(undefined)
   const [serviceAreaStore, setServiceAreaStore] = useState<Store | undefined>(undefined)
@@ -35,6 +35,24 @@ const StoreManagement: React.FC = () => {
 
   const handleManageServiceArea = (store: Store) => {
     setServiceAreaStore(store)
+  }
+
+  // 处理门店上架
+  const handleOnline = async (id: string) => {
+    try {
+      await onlineStore(id)
+    } catch (error) {
+      // 错误信息已在 hook 中处理
+    }
+  }
+
+  // 处理门店下架
+  const handleOffline = async (id: string) => {
+    try {
+      await offlineStore(id)
+    } catch (error) {
+      // 错误信息已在 hook 中处理
+    }
   }
 
   const handleBackToStoreList = () => {
@@ -109,6 +127,27 @@ const StoreManagement: React.FC = () => {
       render: (_, record: Store) => (
         <Space size="middle">
           <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)}>编辑</Button>
+          {record.onlineStatus === 1 ? (
+            <Popconfirm
+              title="下架门店"
+              description="确定要下架这个门店吗？"
+              onConfirm={() => handleOffline(record.id)}
+              okText="确定"
+              cancelText="取消"
+            >
+              <Button type="link" icon={<DownOutlined />}>下架</Button>
+            </Popconfirm>
+          ) : (
+            <Popconfirm
+              title="上架门店"
+              description="确定要上架这个门店吗？"
+              onConfirm={() => handleOnline(record.id)}
+              okText="确定"
+              cancelText="取消"
+            >
+              <Button type="link" icon={<UpOutlined />}>上架</Button>
+            </Popconfirm>
+          )}
           <Button type="link" onClick={() => handleManageServiceArea(record)}>服务范围管理</Button>
           <Popconfirm
             title="删除门店"

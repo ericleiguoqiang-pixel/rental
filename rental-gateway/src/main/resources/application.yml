@@ -24,21 +24,21 @@ spring:
         - id: user-service
           uri: lb://rental-user-service
           predicates:
-            - Path=/api/auth/**,/api/users/**,/api/employees/**,/api/merchants/**,/api/operation/auth/**
+            - Path=/api/auth/**,/api/users/**,/api/employees/**,/api/merchants/**,/api/operation/auth/**,/api/operation/merchants/**
           filters:
             - StripPrefix=0
         
         - id: base-data-service
           uri: lb://rental-base-data-service
           predicates:
-            - Path=/api/stores/**,/api/vehicles/**,/api/car-models/**,/api/operation/stores/**,/api/service-area/**,/api/operation/vehicles/**,/api/operation/merchants/**
+            - Path=/api/stores/**,/api/vehicles/**,/api/car-models/**,/api/operation/stores/**,/api/service-area/**,/api/operation/vehicles/**,/api/operation/car-models/**
           filters:
             - StripPrefix=0
         
         - id: product-service
           uri: lb://rental-product-service
           predicates:
-            - Path=/api/products/**,/api/pricing/**,/api/templates/**
+            - Path=/api/car-model-products/**,/api/value-added-service-templates/**,/api/cancellation-rule-templates/**,/api/service-policy-templates/**,/api/special-pricings/**,/api/product-vehicle-relations/**
           filters:
             - StripPrefix=0
         

@@ -4,8 +4,19 @@ const API_BASE_URL = '/api'
 // 通用请求函数
 export const request = async (url: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('token')
-  // 获取租户ID（这里假设从某个地方获取，比如localStorage或全局状态）
-  const tenantId = localStorage.getItem('tenantId') || '1'; // 默认值为1，实际应该从认证信息中获取
+  // 从用户信息中获取租户ID
+  let tenantId = '1'; // 默认值
+  try {
+    const userInfoStr = localStorage.getItem('userInfo');
+    if (userInfoStr) {
+      const userInfo = JSON.parse(userInfoStr);
+      if (userInfo.tenantId) {
+        tenantId = userInfo.tenantId.toString();
+      }
+    }
+  } catch (e) {
+    console.warn('解析用户信息失败:', e);
+  }
   
   const config: RequestInit = {
     headers: {
@@ -27,14 +38,32 @@ export const request = async (url: string, options: RequestInit = {}) => {
         window.location.href = '/login'
         throw new Error('身份验证失效，请重新登录')
       }
-      throw new Error(`请求失败: ${response.status}`)
+      
+      // 尝试解析错误响应
+      let errorMsg = `请求失败: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        if (errorData.message) {
+          errorMsg = errorData.message;
+        }
+      } catch (e) {
+        // 解析失败，使用默认错误信息
+      }
+      
+      throw new Error(errorMsg);
     }
     
-    const data = await response.json()
-    return data
+    const data = await response.json();
+    
+    // 检查业务响应是否成功
+    if (data && data.code !== 200) {
+      throw new Error(data.message || '业务处理失败');
+    }
+    
+    return data;
   } catch (error) {
-    console.error('API request failed:', error)
-    throw error
+    console.error('API request failed:', error);
+    throw error;
   }
 }
 
@@ -58,6 +87,16 @@ export const storeAPI = {
   // 删除门店
   deleteStore: (id: string) => request(`/stores/${id}`, {
     method: 'DELETE',
+  }),
+  
+  // 门店上架
+  onlineStore: (id: string) => request(`/stores/${id}/online`, {
+    method: 'POST',
+  }),
+  
+  // 门店下架
+  offlineStore: (id: string) => request(`/stores/${id}/offline`, {
+    method: 'POST',
   }),
 }
 
@@ -87,15 +126,32 @@ export const vehicleAPI = {
 // 订单管理API
 export const orderAPI = {
   // 获取订单列表
-  getOrders: () => request('/orders'),
+  getOrders: (params?: { current?: number; size?: number; orderNo?: string; status?: number }) => {
+    const queryString = params ? new URLSearchParams(params as any).toString() : ''
+    return request(`/orders${queryString ? '?' + queryString : ''}`)
+  },
   
   // 获取订单详情
   getOrderDetail: (id: string) => request(`/orders/${id}`),
   
-  // 更新订单状态
-  updateOrderStatus: (id: string, status: string) => request(`/orders/${id}/status`, {
+  // 分配取车司机
+  assignPickupDriver: (id: string, driverName: string) => request(`/orders/${id}/pickup-driver?driverName=${encodeURIComponent(driverName)}`, {
     method: 'PUT',
-    body: JSON.stringify({ status }),
+  }),
+  
+  // 分配还车司机
+  assignReturnDriver: (id: string, driverName: string) => request(`/orders/${id}/return-driver?driverName=${encodeURIComponent(driverName)}`, {
+    method: 'PUT',
+  }),
+  
+  // 确认取车
+  confirmPickup: (id: string) => request(`/orders/${id}/confirm-pickup`, {
+    method: 'PUT',
+  }),
+  
+  // 确认还车
+  confirmReturn: (id: string) => request(`/orders/${id}/confirm-return`, {
+    method: 'PUT',
   }),
 }
 
@@ -158,23 +214,23 @@ export const carModelAPI = {
 // 商户API
 export const merchantAPI = {
   // 商户注册
-  register: (data: any) => request('/merchant/register', {
+  register: (data: any) => request('/merchants/apply', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
   
   // 获取商户申请列表
-  getApplications: () => request('/merchant/applications'),
+  getApplications: () => request('/merchants/applications'),
   
   // 审核商户申请
   auditApplication: (id: string, data: { status: string; reason: string }) => 
-    request(`/merchant/applications/${id}/audit`, {
+    request(`/merchants/applications/${id}/audit`, {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
   
   // 获取商户申请详情
-  getApplicationDetail: (id: string) => request(`/merchant/applications/${id}`),
+  getApplicationDetail: (id: string) => request(`/merchants/applications/${id}`),
 }
 
 // 服务范围API
@@ -203,5 +259,197 @@ export const serviceAreaApi = {
   // 删除服务范围
   delete: (id: number) => request(`/service-area/delete/${id}`, {
     method: 'DELETE',
+  }),
+}
+
+// 商品管理API
+export const productAPI = {
+  // 创建车型商品
+  createProduct: (data: any) => request('/car-model-products', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  
+  // 更新车型商品
+  updateProduct: (id: number, data: any) => request(`/car-model-products/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  
+  // 删除车型商品
+  deleteProduct: (id: number) => request(`/car-model-products/${id}`, {
+    method: 'DELETE',
+  }),
+  
+  // 获取车型商品详情
+  getProduct: (id: number) => request(`/car-model-products/${id}`),
+  
+  // 分页查询车型商品
+  getProductList: (params?: any) => {
+    const queryString = params ? new URLSearchParams(params).toString() : ''
+    return request(`/car-model-products${queryString ? '?' + queryString : ''}`)
+  },
+  
+  // 上架车型商品
+  onlineProduct: (id: number) => request(`/car-model-products/${id}/online`, {
+    method: 'PUT',
+  }),
+  
+  // 下架车型商品
+  offlineProduct: (id: number) => request(`/car-model-products/${id}/offline`, {
+    method: 'PUT',
+  }),
+}
+
+// 模板管理API
+export const templateAPI = {
+  // 增值服务模板相关接口
+  getValueAddedServiceTemplateList: (params?: any) => {
+    const queryString = params ? new URLSearchParams(params).toString() : ''
+    return request(`/value-added-service-templates${queryString ? '?' + queryString : ''}`)
+  },
+  
+  createValueAddedServiceTemplate: (data: any) => request('/value-added-service-templates', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  
+  updateValueAddedServiceTemplate: (id: number, data: any) => request(`/value-added-service-templates/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  
+  deleteValueAddedServiceTemplate: (id: number) => request(`/value-added-service-templates/${id}`, {
+    method: 'DELETE',
+  }),
+  
+  // 取消规则模板相关接口
+  getCancellationRuleTemplateList: (params?: any) => {
+    const queryString = params ? new URLSearchParams(params).toString() : ''
+    return request(`/cancellation-rule-templates${queryString ? '?' + queryString : ''}`)
+  },
+  
+  createCancellationRuleTemplate: (data: any) => request('/cancellation-rule-templates', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  
+  updateCancellationRuleTemplate: (id: number, data: any) => request(`/cancellation-rule-templates/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  
+  deleteCancellationRuleTemplate: (id: number) => request(`/cancellation-rule-templates/${id}`, {
+    method: 'DELETE',
+  }),
+  
+  // 服务政策模板相关接口
+  getServicePolicyTemplateList: (params?: any) => {
+    const queryString = params ? new URLSearchParams(params).toString() : ''
+    return request(`/service-policy-templates${queryString ? '?' + queryString : ''}`)
+  },
+  
+  createServicePolicyTemplate: (data: any) => request('/service-policy-templates', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  
+  updateServicePolicyTemplate: (id: number, data: any) => request(`/service-policy-templates/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  
+  deleteServicePolicyTemplate: (id: number) => request(`/service-policy-templates/${id}`, {
+    method: 'DELETE',
+  }),
+}
+
+// 特殊定价API
+export const pricingAPI = {
+  // 创建特殊定价
+  createPricing: (data: any) => request('/special-pricings', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  
+  // 更新特殊定价
+  updatePricing: (id: number, data: any) => request(`/special-pricings/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  
+  // 删除特殊定价
+  deletePricing: (id: number) => request(`/special-pricings/${id}`, {
+    method: 'DELETE',
+  }),
+  
+  // 获取特殊定价详情
+  getPricing: (id: number) => request(`/special-pricings/${id}`),
+  
+  // 分页查询特殊定价
+  getPricingList: (params?: any) => {
+    const queryString = params ? new URLSearchParams(params).toString() : ''
+    return request(`/special-pricings${queryString ? '?' + queryString : ''}`)
+  },
+  
+  // 获取商品的所有特殊定价
+  getPricingsByProduct: (productId: number) => request(`/special-pricings/product/${productId}`),
+  
+  // 获取商品特殊定价日历视图
+  getPricingsByProductForCalendar: (productId: number) => request(`/special-pricings/product/${productId}/calendar`),
+}
+
+// 商品车辆关联API
+export const vehicleRelationAPI = {
+  // 获取商品关联的车辆
+  getRelatedVehicles: (productId: number) => request(`/product-vehicle-relations/product/${productId}`),
+  
+  // 关联车辆到商品
+  relateVehicles: (data: { productId: number; vehicleIds: number[] }) => request('/product-vehicle-relations/batch', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  
+  // 取消车辆与商品的关联
+  unrelateVehicles: (data: { productId: number; vehicleIds: number[] }) => request('/product-vehicle-relations/batch', {
+    method: 'DELETE',
+    body: JSON.stringify(data),
+  }),
+  
+  // 获取门店下指定车型的可关联车辆
+  getAvailableVehiclesForProduct: (productId: number) => request(`/product-vehicle-relations/product/${productId}/vehicles`),
+}
+
+// 员工管理API
+export const employeeAPI = {
+  // 创建员工
+  createEmployee: (data: any) => request('/employees', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  
+  // 更新员工
+  updateEmployee: (data: any) => request('/employees', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  
+  // 删除员工
+  deleteEmployee: (id: number) => request(`/employees/${id}`, {
+    method: 'DELETE',
+  }),
+  
+  // 获取员工详情
+  getEmployee: (id: number) => request(`/employees/${id}`),
+  
+  // 分页查询员工列表
+  getEmployees: (params?: { current?: number; size?: number; employeeName?: string; phone?: string; status?: number }) => {
+    const queryString = params ? new URLSearchParams(params as any).toString() : ''
+    return request(`/employees${queryString ? '?' + queryString : ''}`)
+  },
+  
+  // 重置员工密码
+  resetPassword: (id: number) => request(`/employees/${id}/reset-password`, {
+    method: 'PUT',
   }),
 }

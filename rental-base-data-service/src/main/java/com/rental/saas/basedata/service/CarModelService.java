@@ -2,8 +2,7 @@ package com.rental.saas.basedata.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rental.saas.basedata.dto.request.CarModelCreateRequest;
-import com.rental.saas.basedata.dto.response.CarModelResponse;
-import com.rental.saas.basedata.entity.CarModel;
+import com.rental.api.basedata.response.CarModelResponse;
 
 import java.util.List;
 
@@ -33,6 +32,8 @@ public interface CarModelService {
      * 根据ID查询车型
      */
     CarModelResponse getCarModelById(Long id);
+
+    List<CarModelResponse> getCarModelsByIds(String ids);
 
     /**
      * 分页查询车型列表

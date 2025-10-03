@@ -32,7 +32,7 @@ export const useMerchantAudit = () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await request('/merchant/applications')
+      const response = await request('/merchants/applications')
       setMerchants(response.data || [])
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : '获取商户申请列表失败'
@@ -105,7 +105,7 @@ export const useMerchantAudit = () => {
   const updateMerchantStatus = async (id: string, status: string, reason: string) => {
     try {
       setLoading(true)
-      await request(`/merchant/applications/${id}/audit`, {
+      await request(`/merchants/applications/${id}/audit`, {
         method: 'PUT',
         body: JSON.stringify({ status, reason }),
       })

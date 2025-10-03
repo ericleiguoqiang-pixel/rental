@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>完整商户注册测试</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>完整商户注册测试</h1>
+    <button onclick="testFullMerchantRegister()">测试完整商户注册</button>
+    <div id="result"></div>
+
+    <script>
+        async function testFullMerchantRegister() {
+            const testData = {
+                companyName: "测试汽车租赁有限公司",
+                unifiedSocialCreditCode: "91110000MA1234567X",
+                legalPersonName: "张三",
+                legalPersonIdCard: "110101199001010001",
+                contactName: "李四",
+                contactPhone: "13800138001",
+                companyAddress: "北京市朝阳区测试地址",
+                businessLicenseUrl: "",
+                transportLicenseUrl: ""
+            };
+
+            try {
+                const response = await fetch('http://localhost:3001/api/merchants/apply', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Tenant-Id': '1'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                const result = await response.json();
+                document.getElementById('result').innerHTML = 
+                    '<h2>请求结果:</h2>' + 
+                    '<p>状态码: ' + response.status + '</p>' + 
+                    '<p>响应: ' + JSON.stringify(result, null, 2) + '</p>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    '<h2>请求失败:</h2>' + 
+                    '<p>错误: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

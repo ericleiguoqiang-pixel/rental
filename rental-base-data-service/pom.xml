@@ -22,6 +22,12 @@
             <artifactId>rental-common</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.rental.saas</groupId>
+            <artifactId>rental-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
         <!-- Spring Boot Web -->
         <dependency>

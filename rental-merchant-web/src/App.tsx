@@ -9,10 +9,13 @@ import VehicleManagement from './pages/VehicleManagement'
 import OrderManagement from './pages/OrderManagement'
 import MerchantRegister from './pages/MerchantRegister'
 import RegisterSuccess from './pages/RegisterSuccess'
-import MerchantAudit from './pages/MerchantAudit'
 import DebugPage from './pages/Debug'
 import DebugServiceArea from './pages/DebugServiceArea'
 import DebugServiceAreaV2 from './pages/DebugServiceAreaV2'
+import ProductManagement from './pages/ProductManagement'
+import TemplateManagement from './pages/TemplateManagement'
+import CalendarTest from './pages/PricingManagement/CalendarTest'
+import EmployeeManagement from './pages/EmployeeManagement' // 导入员工管理页面
 
 import './App.css'
 
@@ -51,13 +54,28 @@ function App() {
               <OrderManagement />
             </AuthGuard>
           } />
-          <Route path="/merchant-audit" element={
-            <AuthGuard>
-              <MerchantAudit />
-            </AuthGuard>
-          } />
           <Route path="/debug-service-area" element={<DebugServiceArea />} />
           <Route path="/debug-service-area-v2" element={<DebugServiceAreaV2 />} />
+          <Route path="/products" element={
+            <AuthGuard>
+              <ProductManagement />
+            </AuthGuard>
+          } />
+          <Route path="/templates" element={
+            <AuthGuard>
+              <TemplateManagement />
+            </AuthGuard>
+          } />
+          <Route path="/pricing-calendar-test" element={
+            <AuthGuard>
+              <CalendarTest />
+            </AuthGuard>
+          } />
+          <Route path="/employees" element={ // 添加员工管理路由
+            <AuthGuard>
+              <EmployeeManagement />
+            </AuthGuard>
+          } />
           
           {/* 默认路由 */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

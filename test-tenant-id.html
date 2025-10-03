@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试Tenant ID</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>测试Tenant ID传递</h1>
+    <button onclick="testTenantId()">测试Tenant ID</button>
+    <div id="result"></div>
+
+    <script>
+        function testTenantId() {
+            // 模拟登录后存储的用户信息
+            const mockUserInfo = {
+                userId: 1,
+                username: "testuser",
+                employeeName: "测试用户",
+                tenantId: 12345, // 模拟的租户ID
+                companyName: "测试公司",
+                roleType: 1,
+                roleTypeDesc: "管理员"
+            };
+            
+            // 存储到localStorage
+            localStorage.setItem('userInfo', JSON.stringify(mockUserInfo));
+            localStorage.setItem('token', 'mock_token');
+            
+            // 从localStorage读取并解析tenantId
+            let tenantId = '1'; // 默认值
+            try {
+                const userInfoStr = localStorage.getItem('userInfo');
+                if (userInfoStr) {
+                    const userInfo = JSON.parse(userInfoStr);
+                    if (userInfo.tenantId) {
+                        tenantId = userInfo.tenantId.toString();
+                    }
+                }
+            } catch (e) {
+                console.warn('解析用户信息失败:', e);
+            }
+            
+            // 显示结果
+            document.getElementById('result').innerHTML = 
+                `<p>从localStorage读取的tenantId: ${tenantId}</p>
+                 <p>类型: ${typeof tenantId}</p>
+                 <p>预期值: 12345</p>
+                 <p>是否正确: ${tenantId === '12345' ? '是' : '否'}</p>`;
+        }
+    </script>
+</body>
+</html>

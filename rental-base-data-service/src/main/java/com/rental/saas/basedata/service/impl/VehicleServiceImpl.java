@@ -2,9 +2,10 @@ package com.rental.saas.basedata.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.rental.api.basedata.response.CarModelResponse;
 import com.rental.saas.basedata.dto.request.VehicleCreateRequest;
 import com.rental.saas.basedata.dto.request.VehicleUpdateRequest;
-import com.rental.saas.basedata.dto.response.VehicleResponse;
+import com.rental.api.basedata.response.VehicleResponse;
 import com.rental.saas.basedata.entity.CarModel;
 import com.rental.saas.basedata.entity.Store;
 import com.rental.saas.basedata.entity.Vehicle;
@@ -159,7 +160,7 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public Page<VehicleResponse> getVehicleList(int current, int size, Long storeId, Long carModelId,
-                                                Integer vehicleStatus, Integer auditStatus, 
+                                                Integer vehicleStatus, Integer auditStatus,
                                                 Integer onlineStatus, Long tenantId) {
         log.info("分页查询车辆列表，当前页: {}, 页大小: {}, 租户ID: {}", current, size, tenantId);
 
@@ -190,7 +191,7 @@ public class VehicleServiceImpl implements VehicleService {
     public List<VehicleResponse> getVehiclesByStore(Long storeId, Long tenantId) {
         List<Vehicle> vehicles = vehicleMapper.findByStoreId(storeId);
         return vehicles.stream()
-                .filter(v -> v.getTenantId().equals(tenantId))
+                .filter(v -> tenantId == null || v.getTenantId().equals(tenantId))
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
@@ -413,7 +414,7 @@ public class VehicleServiceImpl implements VehicleService {
     private void setCarModelInfo(VehicleResponse response, Long carModelId) {
         CarModel carModel = carModelMapper.selectById(carModelId);
         if (carModel != null) {
-            VehicleResponse.CarModelInfo carModelInfo = new VehicleResponse.CarModelInfo();
+            CarModelResponse carModelInfo = new CarModelResponse();
             carModelInfo.setBrand(carModel.getBrand());
             carModelInfo.setSeries(carModel.getSeries());
             carModelInfo.setModel(carModel.getModel());

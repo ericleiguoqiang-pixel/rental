@@ -3,7 +3,7 @@ package com.rental.saas.basedata.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rental.saas.basedata.dto.request.VehicleCreateRequest;
 import com.rental.saas.basedata.dto.request.VehicleUpdateRequest;
-import com.rental.saas.basedata.dto.response.VehicleResponse;
+import com.rental.api.basedata.response.VehicleResponse;
 import com.rental.saas.basedata.service.VehicleService;
 import com.rental.saas.common.annotation.OperationLog;
 import com.rental.saas.common.response.ApiResponse;
@@ -90,14 +90,6 @@ public class VehicleController {
         PageResponse<VehicleResponse> pageResponse = PageResponse.of(
                 current, size, page.getTotal(), page.getRecords());
         return ApiResponse.success("查询成功", pageResponse);
-    }
-
-    @GetMapping("/store/{storeId}")
-    @Operation(summary = "查询门店车辆", description = "查询指定门店的车辆列表")
-    public ApiResponse<List<VehicleResponse>> getVehiclesByStore(@PathVariable @NotNull @Min(1) Long storeId,
-                                                                 @RequestHeader("X-Tenant-Id") Long tenantId) {
-        List<VehicleResponse> vehicles = vehicleService.getVehiclesByStore(storeId, tenantId);
-        return ApiResponse.success("查询成功", vehicles);
     }
 
     @GetMapping("/available")

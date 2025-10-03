@@ -17,6 +17,9 @@ import com.rental.saas.user.entity.Tenant;
 import com.rental.saas.user.mapper.MerchantApplicationMapper;
 import com.rental.saas.user.service.MerchantApplicationService;
 import com.rental.saas.user.service.TenantService;
+import com.rental.saas.user.service.EmployeeService;
+import com.rental.saas.user.dto.request.EmployeeRequest;
+import com.rental.saas.user.entity.Employee;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -41,6 +44,8 @@ public class MerchantApplicationServiceImpl extends ServiceImpl<MerchantApplicat
         implements MerchantApplicationService {
 
     private final TenantService tenantService;
+    private final EmployeeService employeeService;
+    private final MerchantApplicationMapper merchantApplicationMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -76,7 +81,7 @@ public class MerchantApplicationServiceImpl extends ServiceImpl<MerchantApplicat
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void auditApplication(Long id, Integer status, String remark, Long auditorId) {
+    public boolean auditApplication(Long id, String status, String remark, Long auditorId) {
         log.info("审核商户入驻申请: id={}, status={}", id, status);
 
         MerchantApplication application = getById(id);
@@ -88,20 +93,39 @@ public class MerchantApplicationServiceImpl extends ServiceImpl<MerchantApplicat
             throw new BusinessException(ResponseCode.APPLICATION_ALREADY_PROCESSED);
         }
 
+        // 更新状态
+        Integer statusValue;
+        switch (status) {
+            case "APPROVED":
+                statusValue = ApplicationStatus.APPROVED.getCode(); // 审核通过
+                break;
+            case "REJECTED":
+                statusValue = ApplicationStatus.REJECTED.getCode(); // 审核拒绝
+                break;
+            default:
+                log.warn("无效的审核状态: {}", status);
+                return false;
+        }
+
         // 更新申请状态
-        application.setApplicationStatus(status);
+        application.setApplicationStatus(statusValue);
         application.setAuditRemark(remark);
         application.setAuditTime(LocalDateTime.now());
         application.setAuditorId(auditorId);
 
-        // 如果审核通过，创建租户
-        if (ApplicationStatus.APPROVED.getCode().equals(status)) {
+
+        // 如果审核通过，创建租户和员工
+        if (ApplicationStatus.APPROVED.getCode().equals(statusValue)) {
             Long tenantId = createTenant(application);
             application.setTenantId(tenantId);
+            
+            // 创建员工账号
+            createEmployeeForMerchant(application, tenantId);
         }
 
         updateById(application);
         log.info("商户入驻申请审核完成: id={}, status={}", id, status);
+        return true;
     }
 
     @Override
@@ -185,6 +209,36 @@ public class MerchantApplicationServiceImpl extends ServiceImpl<MerchantApplicat
     }
 
     /**
+     * 为商户创建员工账号
+     */
+    private void createEmployeeForMerchant(MerchantApplication application, Long tenantId) {
+        log.info("为商户创建员工账号: {}", application.getContactName());
+        
+        try {
+            // 创建员工请求
+            EmployeeRequest employeeRequest = new EmployeeRequest();
+            employeeRequest.setEmployeeName(application.getContactName());
+            employeeRequest.setPhone(CryptoUtil.aesDecrypt(application.getContactPhone()));
+            employeeRequest.setUsername(application.getContactName()); // 使用联系人姓名作为用户名
+            employeeRequest.setPassword("123456"); // 默认密码
+            employeeRequest.setStatus(1); // 启用
+            employeeRequest.setRoleType(2); // 门店管理员
+            employeeRequest.setStoreId(null); // 初始时没有门店关联
+
+            // 设置租户ID
+            // 注意：这里需要通过某种方式设置租户ID，可能需要修改EmployeeRequest或使用上下文
+            
+            // 创建员工
+            employeeService.createEmployee(employeeRequest, tenantId);
+            
+            log.info("商户员工账号创建成功: contactName={}", application.getContactName());
+        } catch (Exception e) {
+            log.error("创建商户员工账号失败: contactName={}, error={}", application.getContactName(), e.getMessage(), e);
+            // 不抛出异常，避免影响主流程
+        }
+    }
+
+    /**
      * 生成租户编码
      */
     private String generateTenantCode() {
@@ -218,4 +272,40 @@ public class MerchantApplicationServiceImpl extends ServiceImpl<MerchantApplicat
 
         return response;
     }
+
+
+    @Override
+    public IPage<MerchantApplication> getPendingApplications(Integer current, Integer size) {
+        LambdaQueryWrapper<MerchantApplication> wrapper = new LambdaQueryWrapper<>();
+        // 只查询待审核的申请（状态为0）
+        wrapper.eq(MerchantApplication::getApplicationStatus, 0);
+        wrapper.orderByDesc(MerchantApplication::getId);
+
+        Page<MerchantApplication> page = new Page<>(current, size);
+        return merchantApplicationMapper.selectPage(page, wrapper);
+    }
+
+    @Override
+    public IPage<MerchantApplication> getAllApplications(Integer current, Integer size, String status) {
+        LambdaQueryWrapper<MerchantApplication> wrapper = new LambdaQueryWrapper<>();
+        // 根据状态筛选
+        if (status != null && !status.isEmpty()) {
+            try {
+                Integer statusValue = Integer.valueOf(status);
+                wrapper.eq(MerchantApplication::getApplicationStatus, statusValue);
+            } catch (NumberFormatException e) {
+                log.warn("状态参数格式错误: {}", status);
+            }
+        }
+        wrapper.orderByDesc(MerchantApplication::getId);
+
+        Page<MerchantApplication> page = new Page<>(current, size);
+        return merchantApplicationMapper.selectPage(page, wrapper);
+    }
+
+    @Override
+    public MerchantApplication getById(Long id) {
+        return merchantApplicationMapper.selectById(id);
+    }
+
 }

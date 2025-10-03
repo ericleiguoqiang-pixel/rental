@@ -3,12 +3,13 @@ package com.rental.saas.basedata.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rental.saas.basedata.dto.request.CarModelCreateRequest;
-import com.rental.saas.basedata.dto.response.CarModelResponse;
+import com.rental.api.basedata.response.CarModelResponse;
 import com.rental.saas.basedata.entity.CarModel;
 import com.rental.saas.basedata.mapper.CarModelMapper;
 import com.rental.saas.basedata.service.CarModelService;
 import com.rental.saas.common.exception.BusinessException;
 import com.rental.saas.common.response.ResponseCode;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -17,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -99,6 +102,20 @@ public class CarModelServiceImpl implements CarModelService {
     public CarModelResponse getCarModelById(Long id) {
         CarModel carModel = getCarModelEntity(id);
         return convertToResponse(carModel);
+    }
+
+    @Override
+    public List<CarModelResponse> getCarModelsByIds(@NotNull String ids) {
+        String[] allids = ids.split(",");
+        if (allids.length == 0) {
+            return new ArrayList<>();
+        }
+        LambdaQueryWrapper<CarModel> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(CarModel::getId, Arrays.stream(allids).map(Long::parseLong).toList())
+                .eq(CarModel::getDeleted, 0);
+        return carModelMapper.selectList(wrapper).stream()
+                .map(this::convertToResponse)
+                .toList();
     }
 
     @Override

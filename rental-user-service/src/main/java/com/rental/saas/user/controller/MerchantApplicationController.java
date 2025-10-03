@@ -41,18 +41,6 @@ public class MerchantApplicationController {
         return ApiResponse.success("申请提交成功", applicationNo);
     }
 
-    @PutMapping("/{id}/audit")
-    @Operation(summary = "审核商户入驻申请", description = "平台管理员审核商户入驻申请")
-    @OperationLog(type = "商户入驻", description = "审核商户入驻申请")
-    public ApiResponse<Void> auditApplication(
-            @Parameter(description = "申请ID") @PathVariable @NotNull @Positive Long id,
-            @Parameter(description = "审核状态：1-通过，2-拒绝") @RequestParam @NotNull Integer status,
-            @Parameter(description = "审核备注") @RequestParam(required = false) String remark,
-            @RequestHeader("X-User-Id") Long auditorId) {
-        merchantApplicationService.auditApplication(id, status, remark, auditorId);
-        return ApiResponse.success();
-    }
-
     @GetMapping("/applications")
     @Operation(summary = "分页查询商户入驻申请", description = "分页查询商户入驻申请列表")
     public ApiResponse<PageResponse<MerchantApplicationResponse>> pageApplications(

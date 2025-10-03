@@ -207,4 +207,50 @@ export const operationDashboardAPI = {
   }
 };
 
+// 车型管理API
+export const carModelAPI = {
+  // 创建车型
+  createCarModel: async (data: any) => {
+    const response = await apiClient.post<ApiResponse<number>>('/operation/car-models', data);
+    return response;
+  },
+  
+  // 更新车型
+  updateCarModel: async (id: number, data: any) => {
+    const response = await apiClient.put<ApiResponse<void>>(`/operation/car-models/${id}`, data);
+    return response;
+  },
+  
+  // 删除车型
+  deleteCarModel: async (id: number) => {
+    const response = await apiClient.delete<ApiResponse<void>>(`/operation/car-models/${id}`);
+    return response;
+  },
+  
+  // 获取车型详情
+  getCarModel: async (id: number) => {
+    const response = await apiClient.get<ApiResponse<any>>(`/operation/car-models/${id}`);
+    return response;
+  },
+  
+  // 分页查询车型列表
+  getCarModelList: async (params?: any) => {
+    const queryString = params ? new URLSearchParams(params).toString() : '';
+    const response = await apiClient.get<ApiResponse<PageResponse<any>>>(`/operation/car-models${queryString ? '?' + queryString : ''}`);
+    return response;
+  },
+  
+  // 查询全部车型
+  getAllCarModels: async () => {
+    const response = await apiClient.get<ApiResponse<any[]>>('/operation/car-models/all');
+    return response;
+  },
+  
+  // 按品牌查询车型
+  getCarModelsByBrand: async (brand: string) => {
+    const response = await apiClient.get<ApiResponse<any[]>>(`/operation/car-models/brand/${brand}`);
+    return response;
+  }
+};
+
 export default apiClient;

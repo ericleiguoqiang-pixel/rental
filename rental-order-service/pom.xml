@@ -22,6 +22,12 @@
             <artifactId>rental-common</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.rental.saas</groupId>
+            <artifactId>rental-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
         <!-- Spring Boot Web -->
         <dependency>
@@ -45,6 +51,13 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+            <!-- 排除commons-logging避免冲突 -->
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         
         <dependency>

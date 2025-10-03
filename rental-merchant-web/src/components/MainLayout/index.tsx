@@ -12,6 +12,10 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   AuditOutlined,
+  ShoppingOutlined,
+  FileDoneOutlined,
+  DollarOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 
@@ -35,7 +39,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '仪表盘' }
     if (path === '/stores') return ['stores'];
     if (path === '/vehicles') return ['vehicles'];
     if (path === '/orders') return ['orders'];
-    if (path === '/merchant-audit') return ['merchant-audit'];
+    if (path === '/products') return ['products'];
+    if (path === '/templates') return ['templates'];
+    if (path === '/employees') return ['employees'];
     return ['dashboard'];
   };
 
@@ -53,8 +59,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '仪表盘' }
       case 'orders':
         navigate('/orders');
         break;
-      case 'merchant-audit':
-        navigate('/merchant-audit');
+      case 'products':
+        navigate('/products');
+        break;
+      case 'templates':
+        navigate('/templates');
+        break;
+      case 'employees':
+        navigate('/employees');
         break;
       default:
         break;
@@ -78,14 +90,24 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '仪表盘' }
       label: '车辆管理',
     },
     {
+      key: 'products',
+      icon: <ShoppingOutlined />,
+      label: '商品管理',
+    },
+    {
+      key: 'templates',
+      icon: <FileDoneOutlined />,
+      label: '模板管理',
+    },
+    {
       key: 'orders',
       icon: <FileTextOutlined />,
       label: '订单管理',
     },
     {
-      key: 'merchant-audit',
-      icon: <AuditOutlined />,
-      label: '商户审核',
+      key: 'employees',
+      icon: <TeamOutlined />,
+      label: '员工管理',
     },
   ];
 

@@ -2,7 +2,7 @@ package com.rental.saas.basedata.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rental.saas.basedata.dto.request.CarModelCreateRequest;
-import com.rental.saas.basedata.dto.response.CarModelResponse;
+import com.rental.api.basedata.response.CarModelResponse;
 import com.rental.saas.basedata.service.CarModelService;
 import com.rental.saas.common.annotation.OperationLog;
 import com.rental.saas.common.response.ApiResponse;
