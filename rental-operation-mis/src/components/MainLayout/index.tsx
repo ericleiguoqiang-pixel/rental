@@ -13,6 +13,7 @@ import {
   MenuUnfoldOutlined,
   SafetyCertificateOutlined,
   DatabaseOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuthStore } from '../../hooks/useAuth';
@@ -36,17 +37,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '运营概览
   const getSelectedKeys = () => {
     const path = location.pathname;
     if (path === '/' || path === '/dashboard') return ['dashboard'];
-    if (path === '/merchant-audit') return ['merchant-audit'];
     if (path === '/vehicle-audit') return ['vehicle-audit'];
     if (path === '/store-audit') return ['store-audit'];
     if (path === '/car-models') return ['car-models'];
+    if (path === '/users') return ['users'];
     return ['dashboard'];
   };
 
   // 根据当前路径设置展开的菜单项
   const getDefaultOpenKeys = () => {
     const path = location.pathname;
-    if (path === '/merchant-audit' || path === '/vehicle-audit' || path === '/store-audit') {
+    if (path === '/vehicle-audit' || path === '/store-audit') {
       return ['audit'];
     }
     return [];
@@ -62,9 +63,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '运营概览
       case 'dashboard':
         navigate('/dashboard');
         break;
-      case 'merchant-audit':
-        navigate('/merchant-audit');
-        break;
       case 'vehicle-audit':
         navigate('/vehicle-audit');
         break;
@@ -73,6 +71,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '运营概览
         break;
       case 'car-models':
         navigate('/car-models');
+        break;
+      case 'users':
+        navigate('/users');
         break;
       default:
         break;
@@ -83,7 +84,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '运营概览
   const onOpenChange = (keys: string[]) => {
     // 保持"audit"菜单项在相关子菜单被选中时始终展开
     const path = location.pathname;
-    if (path === '/merchant-audit' || path === '/vehicle-audit' || path === '/store-audit') {
+    if (path === '/vehicle-audit' || path === '/store-audit') {
       setOpenKeys(['audit', ...keys.filter(key => key !== 'audit')]);
     } else {
       setOpenKeys(keys);
@@ -102,11 +103,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '运营概览
       label: '审核管理',
       children: [
         {
-          key: 'merchant-audit',
-          icon: <UserOutlined />,
-          label: '商户审核',
-        },
-        {
           key: 'vehicle-audit',
           icon: <CarOutlined />,
           label: '车辆审核',
@@ -122,6 +118,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '运营概览
       key: 'car-models',
       icon: <DatabaseOutlined />,
       label: '车型管理',
+    },
+    {
+      key: 'users',
+      icon: <TeamOutlined />,
+      label: '用户管理',
     },
   ];
 

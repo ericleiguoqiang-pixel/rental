@@ -9,6 +9,7 @@ import MerchantAudit from './pages/MerchantAudit'
 import VehicleAudit from './pages/VehicleAudit'
 import StoreAudit from './pages/StoreAudit'
 import CarModelManagement from './pages/CarModelManagement'
+import UserManagement from './pages/UserManagement'
 import './App.css'
 
 function App() {
@@ -44,6 +45,11 @@ function App() {
             <Route path="/car-models" element={
               <AuthGuard>
                 <CarModelManagement />
+              </AuthGuard>
+            } />
+            <Route path="/users" element={
+              <AuthGuard>
+                <UserManagement />
               </AuthGuard>
             } />
             

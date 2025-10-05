@@ -110,16 +110,16 @@ public class StoreController {
         return ApiResponse.success("查询成功", stores);
     }
 
-    @GetMapping("/nearby")
-    @Operation(summary = "查询附近门店", description = "查询指定范围内的门店")
-    public ApiResponse<List<StoreResponse>> getStoresInRange(
-            @Parameter(description = "经度") @RequestParam Double longitude,
-            @Parameter(description = "纬度") @RequestParam Double latitude,
-            @Parameter(description = "半径(公里)") @RequestParam(defaultValue = "10") Double radius) {
-        
-        List<StoreResponse> stores = storeService.getStoresInRange(longitude, latitude, radius);
-        return ApiResponse.success("查询成功", stores);
-    }
+//    @GetMapping("/nearby")
+//    @Operation(summary = "查询附近门店", description = "查询指定范围内的门店")
+//    public ApiResponse<List<StoreResponse>> getStoresInRange(
+//            @Parameter(description = "经度") @RequestParam Double longitude,
+//            @Parameter(description = "纬度") @RequestParam Double latitude,
+//            @Parameter(description = "半径(公里)") @RequestParam(defaultValue = "10") Double radius) {
+//
+//        List<StoreResponse> stores = storeService.getStoresInRange(longitude, latitude, radius);
+//        return ApiResponse.success("查询成功", stores);
+//    }
 
     @PostMapping("/{id}/online")
     @Operation(summary = "门店上架", description = "设置门店为上架状态")

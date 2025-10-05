@@ -10,16 +10,23 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>rental-user-service</artifactId>
+    <artifactId>rental-pricing</artifactId>
     <packaging>jar</packaging>
-    <name>Rental User Service</name>
-    <description>用户服务，提供商户入驻、员工管理、权限控制等功能</description>
+    <name>Rental Pricing Service</name>
+    <description>定价服务，提供报价计算、报价管理等功能</description>
 
     <dependencies>
         <!-- 公共模块 -->
         <dependency>
             <groupId>com.rental.saas</groupId>
             <artifactId>rental-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- API模块 -->
+        <dependency>
+            <groupId>com.rental.saas</groupId>
+            <artifactId>rental-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         
@@ -39,6 +46,18 @@
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+        
+        <!-- Feign -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        
+        <!-- LoadBalancer -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
         
         <!-- 数据库相关 -->
@@ -74,34 +93,6 @@
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-stream-rocketmq</artifactId>
-        </dependency>
-        
-        <!-- 参数校验 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-        </dependency>
-        
-        <!-- JWT -->
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
-        </dependency>
-        
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-        </dependency>
-        
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
-        </dependency>
-        
-        <!-- 文档相关 -->
-        <dependency>
-            <groupId>com.github.xiaoymin</groupId>
-            <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
         </dependency>
         
         <!-- 监控 -->

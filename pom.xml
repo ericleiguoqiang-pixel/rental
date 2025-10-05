@@ -21,6 +21,7 @@
         <module>rental-order-service</module>
         <module>rental-payment-service</module>
         <module>rental-api</module>
+        <module>rental-pricing</module>
     </modules>
 
     <properties>

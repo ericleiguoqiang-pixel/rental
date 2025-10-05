@@ -56,6 +56,13 @@ spring:
           filters:
             - StripPrefix=0
 
+        - id: pricing-service
+          uri: lb://rental-pricing
+          predicates:
+            - Path=/api/pricing/**
+          filters:
+            - StripPrefix=0
+
 # 监控配置
 management:
   endpoints:

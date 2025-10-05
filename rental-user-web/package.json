@@ -1,14 +1,15 @@
 {
-  "name": "rental-operation-mis",
+  "name": "rental-user-web",
   "version": "1.0.0",
-  "description": "租车SaaS系统运营MIS管理平台",
-  "type": "module",
+  "description": "租车SaaS系统用户端移动端",
+  "main": "index.js",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix"
+    "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
+    "test": "jest"
   },
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
@@ -26,12 +27,15 @@
     "zustand": "^4.3.6"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^14.0.0",
     "@typescript-eslint/eslint-plugin": "^5.55.0",
     "@typescript-eslint/parser": "^5.55.0",
     "@vitejs/plugin-react": "^3.1.0",
     "eslint": "^8.36.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "jest": "^29.5.0",
     "prettier": "^2.8.7",
     "typescript": "^4.9.5",
     "vite": "^4.5.14"
@@ -39,8 +43,8 @@
   "keywords": [
     "rental",
     "saas",
-    "operation",
-    "mis",
+    "user",
+    "mobile",
     "react",
     "antd"
   ],

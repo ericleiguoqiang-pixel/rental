@@ -1,6 +1,8 @@
 package com.rental.api.basedata;
 
 import com.rental.api.basedata.response.CarModelResponse;
+import com.rental.api.basedata.response.ServiceAreaResponse;
+import com.rental.api.basedata.response.StoreResponse;
 import com.rental.api.basedata.response.VehicleResponse;
 import com.rental.saas.common.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -22,11 +24,33 @@ public interface BaseDataClient {
     /**
      * 根据门店ID和租户ID获取车辆列表
      */
-    @GetMapping("/api/vehicles/store/{storeId}")
+    @GetMapping("/api/feign/vehicles/store/{storeId}")
     ApiResponse<List<VehicleResponse>> getVehiclesByStore(
             @PathVariable("storeId") Long storeId);
 
-    @GetMapping("/api/car-models/batch/{ids}")
+    @GetMapping("/api/feign/car-models/batch/{ids}")
     ApiResponse<List<CarModelResponse>> getCarModelsByIds(
             @PathVariable("ids") String ids);
+    
+    /**
+     * 获取附近门店列表
+     */
+    @GetMapping("/api/feign/stores/nearby")
+    ApiResponse<List<StoreResponse>> getNearbyStores(
+            @RequestParam("longitude") Double longitude,
+            @RequestParam("latitude") Double latitude,
+            @RequestParam("distance") Double distance);
+    
+    /**
+     * 根据门店ID获取门店详情
+     */
+    @GetMapping("/api/feign/stores/{id}")
+    ApiResponse<StoreResponse> getStoreById(@PathVariable("id") Long id);
+    
+    /**
+     * 获取门店的服务范围列表
+     */
+    @GetMapping("/api/feign/service-areas/store/{storeId}")
+    ApiResponse<List<ServiceAreaResponse>> getServiceAreasByStore(
+            @PathVariable("storeId") Long storeId);
 }
