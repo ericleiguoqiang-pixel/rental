@@ -1,6 +1,6 @@
 package com.rental.saas.pricing.dto;
 
-import com.rental.saas.pricing.entity.Quote;
+import com.rental.api.pricing.entity.Quote;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import java.util.List;

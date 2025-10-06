@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Button, DatePicker, TimePicker, Card, Typography, message, Modal } from 'antd';
+import { Button, DatePicker, TimePicker, Card, Typography, message, Modal, Row, Col } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import LocationModal from '../components/LocationModal';
+import UserInfo from '../components/UserInfo';
+import { getUserInfo } from '../services/authService';
 
 const { Title } = Typography;
 
@@ -17,6 +19,7 @@ const Home: React.FC = () => {
     address?: string;
   } | null>(null);
   const [isLocationModalVisible, setIsLocationModalVisible] = useState(false);
+  const [userInfo, setUserInfo] = useState<any>(null);
   const navigate = useNavigate();
 
   // 设置默认时间
@@ -29,6 +32,10 @@ const Home: React.FC = () => {
     setPickupTime(defaultTime);
     setDropoffDate(dayAfterTomorrow);
     setDropoffTime(defaultTime);
+    
+    // 获取用户信息
+    const user = getUserInfo();
+    setUserInfo(user);
   }, []);
 
   const showLocationModal = () => {
@@ -80,6 +87,22 @@ const Home: React.FC = () => {
 
   return (
     <div style={{ padding: 20 }}>
+      <Row justify="space-between" style={{ marginBottom: 20 }}>
+        <Col>
+          {userInfo && (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ marginRight: 10 }}>欢迎，{userInfo.employeeName}</span>
+              <UserInfo />
+            </div>
+          )}
+        </Col>
+        <Col>
+          <Button type="primary" onClick={() => navigate('/my-orders')}>
+            我的订单
+          </Button>
+        </Col>
+      </Row>
+      
       <Card>
         <Title level={3} style={{ textAlign: 'center' }}>选择用车时间和地点</Title>
         

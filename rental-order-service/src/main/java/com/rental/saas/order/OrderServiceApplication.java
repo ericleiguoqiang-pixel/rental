@@ -11,9 +11,9 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * 
  * @author Rental SaaS Team
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.rental.saas.order", "com.rental.saas.common"})
 @EnableDiscoveryClient
-@EnableFeignClients
+@EnableFeignClients(basePackages = "com.rental.api")
 @MapperScan("com.rental.saas.order.mapper")
 public class OrderServiceApplication {
 

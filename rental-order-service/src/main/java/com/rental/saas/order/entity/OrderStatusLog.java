@@ -3,6 +3,7 @@ package com.rental.saas.order.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.rental.saas.common.entity.BaseEntity;
+import com.rental.saas.common.entity.CsideBaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,10 +16,9 @@ import java.time.LocalDateTime;
  * @author Rental SaaS Team
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @TableName("order_status_log")
 @Schema(description = "订单状态变更记录")
-public class OrderStatusLog extends BaseEntity {
+public class OrderStatusLog {
 
     /**
      * 订单ID

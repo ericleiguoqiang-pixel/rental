@@ -127,8 +127,18 @@ export const vehicleAPI = {
 export const orderAPI = {
   // 获取订单列表
   getOrders: (params?: { current?: number; size?: number; orderNo?: string; status?: number }) => {
-    const queryString = params ? new URLSearchParams(params as any).toString() : ''
-    return request(`/orders${queryString ? '?' + queryString : ''}`)
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key as keyof typeof params] !== undefined) {
+          filteredParams[key] = params[key as keyof typeof params];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
+    return request(`/orders${queryString ? '?' + queryString : ''}`);
   },
   
   // 获取订单详情
@@ -197,8 +207,18 @@ export const carModelAPI = {
   
   // 分页查询车型
   getCarModels: (params?: any) => {
-    const queryString = params ? new URLSearchParams(params).toString() : ''
-    return request(`/car-models${queryString ? '?' + queryString : ''}`)
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined) {
+          filteredParams[key] = params[key];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
+    return request(`/car-models${queryString ? '?' + queryString : ''}`);
   },
   
   // 根据品牌查询车型
@@ -240,7 +260,17 @@ export const serviceAreaApi = {
   
   // 分页查询服务范围
   pageServiceAreas: (params: { pageNo?: number; pageSize?: number; storeId?: number; areaType?: number }) => {
-    const queryString = new URLSearchParams(params as any).toString();
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key as keyof typeof params] !== undefined) {
+          filteredParams[key] = params[key as keyof typeof params];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
     return request(`/service-area/page${queryString ? '?' + queryString : ''}`);
   },
   
@@ -286,8 +316,18 @@ export const productAPI = {
   
   // 分页查询车型商品
   getProductList: (params?: any) => {
-    const queryString = params ? new URLSearchParams(params).toString() : ''
-    return request(`/car-model-products${queryString ? '?' + queryString : ''}`)
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined) {
+          filteredParams[key] = params[key];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
+    return request(`/car-model-products${queryString ? '?' + queryString : ''}`);
   },
   
   // 上架车型商品
@@ -305,8 +345,18 @@ export const productAPI = {
 export const templateAPI = {
   // 增值服务模板相关接口
   getValueAddedServiceTemplateList: (params?: any) => {
-    const queryString = params ? new URLSearchParams(params).toString() : ''
-    return request(`/value-added-service-templates${queryString ? '?' + queryString : ''}`)
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined) {
+          filteredParams[key] = params[key];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
+    return request(`/value-added-service-templates${queryString ? '?' + queryString : ''}`);
   },
   
   createValueAddedServiceTemplate: (data: any) => request('/value-added-service-templates', {
@@ -325,8 +375,18 @@ export const templateAPI = {
   
   // 取消规则模板相关接口
   getCancellationRuleTemplateList: (params?: any) => {
-    const queryString = params ? new URLSearchParams(params).toString() : ''
-    return request(`/cancellation-rule-templates${queryString ? '?' + queryString : ''}`)
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined) {
+          filteredParams[key] = params[key];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
+    return request(`/cancellation-rule-templates${queryString ? '?' + queryString : ''}`);
   },
   
   createCancellationRuleTemplate: (data: any) => request('/cancellation-rule-templates', {
@@ -345,8 +405,18 @@ export const templateAPI = {
   
   // 服务政策模板相关接口
   getServicePolicyTemplateList: (params?: any) => {
-    const queryString = params ? new URLSearchParams(params).toString() : ''
-    return request(`/service-policy-templates${queryString ? '?' + queryString : ''}`)
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined) {
+          filteredParams[key] = params[key];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
+    return request(`/service-policy-templates${queryString ? '?' + queryString : ''}`);
   },
   
   createServicePolicyTemplate: (data: any) => request('/service-policy-templates', {
@@ -388,8 +458,18 @@ export const pricingAPI = {
   
   // 分页查询特殊定价
   getPricingList: (params?: any) => {
-    const queryString = params ? new URLSearchParams(params).toString() : ''
-    return request(`/special-pricings${queryString ? '?' + queryString : ''}`)
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined) {
+          filteredParams[key] = params[key];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
+    return request(`/special-pricings${queryString ? '?' + queryString : ''}`);
   },
   
   // 获取商品的所有特殊定价
@@ -444,8 +524,18 @@ export const employeeAPI = {
   
   // 分页查询员工列表
   getEmployees: (params?: { current?: number; size?: number; employeeName?: string; phone?: string; status?: number }) => {
-    const queryString = params ? new URLSearchParams(params as any).toString() : ''
-    return request(`/employees${queryString ? '?' + queryString : ''}`)
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key as keyof typeof params] !== undefined) {
+          filteredParams[key] = params[key as keyof typeof params];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
+    return request(`/employees${queryString ? '?' + queryString : ''}`);
   },
   
   // 重置员工密码

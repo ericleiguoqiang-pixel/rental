@@ -2,6 +2,7 @@ package com.rental.saas.order.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.rental.saas.common.entity.CsideBaseEntity;
 import com.rental.saas.common.entity.TenantBaseEntity;
 import com.rental.saas.common.enums.OrderStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,7 +20,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @TableName("rental_order")
 @Schema(description = "订单")
-public class Order extends TenantBaseEntity {
+public class Order extends CsideBaseEntity {
 
     /**
      * 订单号
@@ -106,6 +107,13 @@ public class Order extends TenantBaseEntity {
     private String orderLocation;
 
     /**
+     * 用户ID
+     */
+    @TableField("user_id")
+    @Schema(description = "用户ID", example = "1")
+    private Long userId;
+
+    /**
      * 车型ID
      */
     @TableField("car_model_id")
@@ -169,6 +177,13 @@ public class Order extends TenantBaseEntity {
     private String returnDriver;
 
     /**
+     * 订单金额(分)
+     */
+    @TableField("order_amount")
+    @Schema(description = "订单金额(分)", example = "300000")
+    private Integer orderAmount;
+
+    /**
      * 基础租车费(分)
      */
     @TableField("basic_rental_fee")
@@ -211,6 +226,13 @@ public class Order extends TenantBaseEntity {
     private Integer actualDeposit;
 
     /**
+     * 实际押金(分)
+     */
+    @TableField("is_deposit_paid")
+    @Schema(description = "实际押金(分)", example = "300000")
+    private Integer isDepositPaid;
+
+    /**
      * 服务保障快照(JSON)
      */
     @TableField("vas_snapshot")
@@ -231,17 +253,4 @@ public class Order extends TenantBaseEntity {
     @Schema(description = "服务政策快照(JSON)")
     private String servicePolicySnapshot;
 
-    /**
-     * 获取订单状态枚举
-     */
-    public OrderStatus getOrderStatusEnum() {
-        return OrderStatus.getByCode(this.orderStatus);
-    }
-
-    /**
-     * 设置订单状态
-     */
-    public void setOrderStatus(OrderStatus status) {
-        this.orderStatus = status.getCode();
-    }
 }

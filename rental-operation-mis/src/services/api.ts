@@ -1,98 +1,35 @@
-import axios, { InternalAxiosRequestConfig } from 'axios';
-
-// API基础配置
-const API_BASE_URL = '/api';
-
-// 创建axios实例
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// 请求拦截器 - 添加认证token
-apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('mis_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// 响应拦截器 - 处理通用错误
-apiClient.interceptors.response.use(
-  (response) => {
-    return response.data;
-  },
-  (error) => {
-    if (error.response?.status === 401) {
-      // Token过期或无效，清除token并跳转到登录页
-      localStorage.removeItem('mis_token');
-      localStorage.removeItem('mis_user');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
-
-// 定义API响应结构
-export interface ApiResponse<T> {
-  code: number;
-  message: string;
-  data: T;
-}
-
-export interface PageResponse<T> {
-  records: T[];
-  total: number;
-  pageNum: number;
-  pageSize: number;
-  pages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
-}
-
-// 运营MIS认证API
-export const operationAuthAPI = {
-  // 运营管理员登录 (调用后端API)
-  login: async (credentials: { username: string; password: string }) => {
-    const response = await apiClient.post('/operation/auth/login', credentials);
-    return response;
-  },
-  
-  // 登出
-  logout: () => {
-    localStorage.removeItem('mis_token');
-    localStorage.removeItem('mis_user');
-  },
-  
-  // 验证token
-  validateToken: () => {
-    const token = localStorage.getItem('mis_token');
-    const user = localStorage.getItem('mis_user');
-    return !!(token && user);
-  }
-};
-
 // 商户审核API
 export const merchantAuditAPI = {
   // 获取待审核商户列表
   getPendingMerchants: async (params?: any) => {
-    const queryString = params ? new URLSearchParams(params).toString() : '';
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined) {
+          filteredParams[key] = params[key];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
     const response = await apiClient.get<ApiResponse<PageResponse<any>>>(`/operation/merchants/pending${queryString ? '?' + queryString : ''}`);
     return response;
   },
   
   // 获取所有商户列表
   getAllMerchants: async (params?: any) => {
-    const queryString = params ? new URLSearchParams(params).toString() : '';
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined) {
+          filteredParams[key] = params[key];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
     const response = await apiClient.get<ApiResponse<PageResponse<any>>>(`/operation/merchants${queryString ? '?' + queryString : ''}`);
     return response;
   },
@@ -120,14 +57,34 @@ export const merchantAuditAPI = {
 export const vehicleAuditAPI = {
   // 获取待审核车辆列表
   getPendingVehicles: async (params?: any) => {
-    const queryString = params ? new URLSearchParams(params).toString() : '';
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined) {
+          filteredParams[key] = params[key];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
     const response = await apiClient.get<ApiResponse<PageResponse<any>>>(`/operation/vehicles/pending${queryString ? '?' + queryString : ''}`);
     return response;
   },
   
   // 获取所有车辆列表
   getAllVehicles: async (params?: any) => {
-    const queryString = params ? new URLSearchParams(params).toString() : '';
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined) {
+          filteredParams[key] = params[key];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
     const response = await apiClient.get<ApiResponse<PageResponse<any>>>(`/operation/vehicles${queryString ? '?' + queryString : ''}`);
     return response;
   },
@@ -155,14 +112,34 @@ export const vehicleAuditAPI = {
 export const storeAuditAPI = {
   // 获取待审核门店列表
   getPendingStores: async (params?: any) => {
-    const queryString = params ? new URLSearchParams(params).toString() : '';
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined) {
+          filteredParams[key] = params[key];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
     const response = await apiClient.get<ApiResponse<PageResponse<any>>>(`/operation/stores/pending${queryString ? '?' + queryString : ''}`);
     return response;
   },
   
   // 获取所有门店列表
   getAllStores: async (params?: any) => {
-    const queryString = params ? new URLSearchParams(params).toString() : '';
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined) {
+          filteredParams[key] = params[key];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
     const response = await apiClient.get<ApiResponse<PageResponse<any>>>(`/operation/stores${queryString ? '?' + queryString : ''}`);
     return response;
   },
@@ -235,7 +212,17 @@ export const carModelAPI = {
   
   // 分页查询车型列表
   getCarModelList: async (params?: any) => {
-    const queryString = params ? new URLSearchParams(params).toString() : '';
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined) {
+          filteredParams[key] = params[key];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
     const response = await apiClient.get<ApiResponse<PageResponse<any>>>(`/operation/car-models${queryString ? '?' + queryString : ''}`);
     return response;
   },
@@ -252,5 +239,3 @@ export const carModelAPI = {
     return response;
   }
 };
-
-export default apiClient;

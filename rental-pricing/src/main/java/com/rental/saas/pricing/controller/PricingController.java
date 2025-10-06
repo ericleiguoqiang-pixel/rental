@@ -2,7 +2,7 @@ package com.rental.saas.pricing.controller;
 
 import com.rental.saas.pricing.dto.QuoteRequest;
 import com.rental.saas.pricing.dto.QuoteResponse;
-import com.rental.saas.pricing.dto.QuoteDetailResponse;
+import com.rental.api.pricing.dto.QuoteDetailResponse;
 import com.rental.saas.pricing.service.PricingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -144,6 +144,7 @@ CREATE TABLE `rental_order` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '订单ID',
     `order_no` VARCHAR(32) NOT NULL COMMENT '订单号',
     `tenant_id` BIGINT NOT NULL COMMENT '租户ID',
+    `user_id` BIGINT NOT NULL COMMENT '用户ID',
     `order_status` TINYINT NOT NULL DEFAULT 1 COMMENT '订单状态:1-待支付,2-待取车,3-已取车,4-已完成,5-已取消',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '下单时间',
     `cancel_time` DATETIME COMMENT '取消时间',
@@ -164,12 +165,14 @@ CREATE TABLE `rental_order` (
     `return_store_id` BIGINT COMMENT '还车门店ID',
     `pickup_driver` VARCHAR(50) COMMENT '取车司机',
     `return_driver` VARCHAR(50) COMMENT '还车司机',
+    `order_amount` INT NOT NULL DEFAULT 0 COMMENT '总金额(分)',
     `basic_rental_fee` INT NOT NULL DEFAULT 0 COMMENT '基础租车费(分)',
     `service_fee` INT NOT NULL DEFAULT 0 COMMENT '服务费(分)',
     `insurance_fee` INT NOT NULL DEFAULT 0 COMMENT '保障费(分)',
     `damage_deposit` INT NOT NULL DEFAULT 0 COMMENT '车损押金(分)',
     `violation_deposit` INT NOT NULL DEFAULT 0 COMMENT '违章押金(分)',
     `actual_deposit` INT NOT NULL DEFAULT 0 COMMENT '实际押金(分)',
+    `is_deposit_paid` TINYINT NOT NULL DEFAULT 0 COMMENT '是否支付押金:0-未支付,1-已支付',
     `vas_snapshot` TEXT COMMENT '服务保障快照(JSON)',
     `cancellation_rule_snapshot` TEXT COMMENT '取消规则快照(JSON)',
     `service_policy_snapshot` TEXT COMMENT '服务政策快照(JSON)',
@@ -232,6 +235,25 @@ CREATE TABLE `payment_record` (
     KEY `idx_payment_status` (`payment_status`),
     KEY `idx_payment_time` (`payment_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='支付记录表';
+
+-- ===================================================================
+-- 用户相关表
+-- ===================================================================
+
+-- 用户表
+CREATE TABLE `rental_user` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+    `phone` VARCHAR(20) NOT NULL COMMENT '手机号',
+    `nickname` VARCHAR(50) COMMENT '昵称',
+    `avatar` VARCHAR(255) COMMENT '头像URL',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '用户状态 0-正常 1-禁用',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_phone` (`phone`),
+    KEY `idx_status` (`status`),
+    KEY `idx_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 
 -- ===================================================================
 -- 系统管理相关表
@@ -332,3 +354,7 @@ WHERE deleted = 0
 GROUP BY tenant_id, DATE(create_time);
 
 COMMIT;
+
+
+
+

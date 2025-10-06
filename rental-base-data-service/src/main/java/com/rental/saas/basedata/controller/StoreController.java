@@ -1,9 +1,9 @@
 package com.rental.saas.basedata.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.rental.api.basedata.response.StoreResponse;
 import com.rental.saas.basedata.dto.request.StoreCreateRequest;
 import com.rental.saas.basedata.dto.request.StoreUpdateRequest;
-import com.rental.saas.basedata.dto.response.StoreResponse;
 import com.rental.saas.basedata.service.StoreService;
 import com.rental.saas.common.annotation.OperationLog;
 import com.rental.saas.common.response.ApiResponse;

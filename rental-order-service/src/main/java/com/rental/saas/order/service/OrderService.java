@@ -3,6 +3,7 @@ package com.rental.saas.order.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.rental.saas.common.enums.OrderStatus;
+import com.rental.saas.order.dto.CreateOrderRequest;
 import com.rental.saas.order.entity.Order;
 import com.rental.saas.order.entity.OrderStatusLog;
 
@@ -12,6 +13,24 @@ import com.rental.saas.order.entity.OrderStatusLog;
  * @author Rental SaaS Team
  */
 public interface OrderService extends IService<Order> {
+
+    /**
+     * 创建订单
+     * 
+     * @param request 创建订单请求参数
+     * @return 订单信息
+     */
+    Order createOrder(CreateOrderRequest request);
+
+    /**
+     * 取消订单
+     * 
+     * @param id 订单ID
+     * @param operatorId 操作人ID
+     * @param operatorName 操作人姓名
+     * @return 是否成功
+     */
+    boolean cancelOrder(Long id, Long operatorId, String operatorName);
 
     /**
      * 分页查询订单列表
@@ -26,13 +45,24 @@ public interface OrderService extends IService<Order> {
     IPage<Order> getOrdersByTenantId(Long tenantId, Integer current, Integer size, String orderNo, Integer status);
 
     /**
+     * 根据用户ID分页查询订单列表
+     * 
+     * @param userId 用户ID
+     * @param current 当前页码
+     * @param size 每页条数
+     * @param orderNo 订单号（可选）
+     * @param status 订单状态（可选）
+     * @return 订单分页数据
+     */
+    IPage<Order> getOrdersByUserId(Long userId, Integer current, Integer size, String orderNo, Integer status);
+
+    /**
      * 根据ID获取订单详情
      * 
      * @param id 订单ID
-     * @param tenantId 租户ID
      * @return 订单详情
      */
-    Order getOrderDetail(Long id, Long tenantId);
+    Order getOrderDetail(Long id);
 
     /**
      * 分配取车司机
@@ -92,4 +122,13 @@ public interface OrderService extends IService<Order> {
      */
     void recordStatusChange(Long orderId, OrderStatus oldStatus, OrderStatus newStatus, String changeReason, 
                            Long operatorId, String operatorName);
+
+    /**
+     * 处理支付成功回调
+     * 
+     * @param orderId 订单ID
+     * @param paymentType 支付类型:1-租车费,2-押金
+     * @return 是否成功
+     */
+    boolean handlePaymentSuccess(Long orderId, Integer paymentType);
 }

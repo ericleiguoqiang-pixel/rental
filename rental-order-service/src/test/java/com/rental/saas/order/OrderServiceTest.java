@@ -32,7 +32,7 @@ public class OrderServiceTest {
     @Test
     public void testGetOrderDetail() {
         // 测试获取订单详情功能
-        Order order = orderService.getOrderDetail(1L, 1L);
+        Order order = orderService.getOrderDetail(1L);
         // 由于是测试环境，订单可能不存在，这里只验证方法能正常执行
         assertTrue(true);
     }

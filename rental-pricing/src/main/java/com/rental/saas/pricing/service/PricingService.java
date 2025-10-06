@@ -2,10 +2,8 @@ package com.rental.saas.pricing.service;
 
 import com.rental.saas.pricing.dto.QuoteRequest;
 import com.rental.saas.pricing.dto.QuoteResponse;
-import com.rental.saas.pricing.dto.QuoteDetailResponse;
-import com.rental.saas.pricing.entity.Quote;
-
-import java.util.List;
+import com.rental.api.pricing.dto.QuoteDetailResponse;
+import com.rental.api.pricing.entity.Quote;
 
 /**
  * 定价服务接口

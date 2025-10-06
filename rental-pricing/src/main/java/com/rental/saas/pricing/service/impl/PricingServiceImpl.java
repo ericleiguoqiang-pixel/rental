@@ -5,13 +5,18 @@ import com.rental.api.basedata.response.ServiceAreaResponse;
 import com.rental.api.basedata.response.StoreResponse;
 import com.rental.api.product.ProductClient;
 import com.rental.api.product.response.CarModelProductResponse;
+import com.rental.api.product.response.ValueAddedServiceTemplateResponse;
+import com.rental.api.product.response.CancellationRuleTemplateResponse;
+import com.rental.api.product.response.ServicePolicyTemplateResponse;
+import com.rental.saas.common.enums.PickupType;
 import com.rental.saas.common.response.ApiResponse;
 import com.rental.saas.pricing.dto.QuoteRequest;
 import com.rental.saas.pricing.dto.QuoteResponse;
-import com.rental.saas.pricing.dto.QuoteDetailResponse;
-import com.rental.saas.pricing.entity.Quote;
+import com.rental.api.pricing.dto.QuoteDetailResponse;
+import com.rental.api.pricing.entity.Quote;
 import com.rental.saas.pricing.service.PricingService;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
@@ -23,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 定价服务实现类
@@ -92,17 +96,173 @@ public class PricingServiceImpl implements PricingService {
         QuoteDetailResponse response = new QuoteDetailResponse();
         response.setQuote(quote);
         
-        // 模拟增值服务模板数据
-        List<Object> vasTemplates = new ArrayList<>();
+        // 获取增值服务模板列表
+        List<ValueAddedServiceTemplateResponse> vasTemplates = getValueAddedServiceTemplates(quote);
         response.setVasTemplates(vasTemplates);
         
-        // 模拟取消规则数据
-        response.setCancellationPolicy(new Object());
+        // 获取取消规则
+        CancellationRuleTemplateResponse cancellationPolicy = getCancellationRule(quote);
+        response.setCancellationPolicy(cancellationPolicy);
         
-        // 模拟服务政策数据
-        response.setServicePolicy(new Object());
+        // 获取服务政策
+        ServicePolicyTemplateResponse servicePolicy = getServicePolicy(quote);
+        response.setServicePolicy(servicePolicy);
         
         return response;
+    }
+    
+    /**
+     * 获取增值服务模板列表
+     * @param quote 报价信息
+     * @return 增值服务模板列表
+     */
+    private List<ValueAddedServiceTemplateResponse> getValueAddedServiceTemplates(Quote quote) {
+        List<ValueAddedServiceTemplateResponse> result = new ArrayList<>();
+        
+        try {
+            // 获取商品信息
+            ApiResponse<CarModelProductResponse> productResponse = productClient.getProductByStoreAndModel(
+                quote.getStoreId(), quote.getModelId());
+            
+            if (productResponse != null && productResponse.getData() != null) {
+                CarModelProductResponse product = productResponse.getData();
+                
+                // 获取所有增值服务模板
+                ApiResponse<List<ValueAddedServiceTemplateResponse>> templatesResponse = 
+                    productClient.getAllValueAddedServiceTemplates();
+                
+                if (templatesResponse != null && templatesResponse.getData() != null) {
+                    List<ValueAddedServiceTemplateResponse> templates = templatesResponse.getData();
+                    
+                    // 根据商品关联的模板ID过滤
+                    for (ValueAddedServiceTemplateResponse template : templates) {
+                        // 如果商品关联了特定模板ID，则只返回关联的模板
+                        if ((product.getVasTemplateId() != null && product.getVasTemplateId().equals(template.getId())) ||
+                            (product.getVasTemplateIdVip() != null && product.getVasTemplateIdVip().equals(template.getId())) ||
+                            (product.getVasTemplateIdVvip() != null && product.getVasTemplateIdVvip().equals(template.getId()))) {
+
+                            ValueAddedServiceTemplateResponse dto = getValueAddedServiceTemplateResponse(template);
+
+                            result.add(dto);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("获取增值服务模板列表失败", e);
+        }
+        
+        return result;
+    }
+
+    @NotNull
+    private static ValueAddedServiceTemplateResponse getValueAddedServiceTemplateResponse(ValueAddedServiceTemplateResponse template) {
+        ValueAddedServiceTemplateResponse dto = new ValueAddedServiceTemplateResponse();
+        dto.setId(template.getId());
+        dto.setTemplateName(template.getTemplateName());
+        dto.setServiceType(template.getServiceType());
+        dto.setPrice(template.getPrice() / 100); // 转换为元
+        dto.setDeductible(template.getDeductible());
+        dto.setIncludeTireDamage(template.getIncludeTireDamage());
+        dto.setIncludeGlassDamage(template.getIncludeGlassDamage());
+        dto.setThirdPartyCoverage(template.getThirdPartyCoverage());
+        dto.setChargeDepreciation(template.getChargeDepreciation());
+        dto.setDepreciationDeductible(template.getDepreciationDeductible());
+        dto.setDepreciationRate(template.getDepreciationRate());
+        return dto;
+    }
+
+    /**
+     * 获取取消规则
+     * @param quote 报价信息
+     * @return 取消规则
+     */
+    private CancellationRuleTemplateResponse getCancellationRule(Quote quote) {
+        try {
+            // 获取商品信息
+            ApiResponse<CarModelProductResponse> productResponse = productClient.getProductByStoreAndModel(
+                quote.getStoreId(), quote.getModelId());
+            
+            if (productResponse != null && productResponse.getData() != null) {
+                CarModelProductResponse product = productResponse.getData();
+                
+                // 如果商品有关联的取消规则模板ID
+                if (product.getCancellationTemplateId() != null) {
+                    ApiResponse<CancellationRuleTemplateResponse> templateResponse = 
+                        productClient.getCancellationRuleTemplateById(product.getCancellationTemplateId());
+                    
+                    if (templateResponse != null && templateResponse.getData() != null) {
+                        CancellationRuleTemplateResponse template = templateResponse.getData();
+                        
+                        CancellationRuleTemplateResponse dto = new CancellationRuleTemplateResponse();
+                        dto.setId(template.getId());
+                        dto.setTemplateName(template.getTemplateName());
+                        dto.setWeekdayRule(template.getWeekdayRule());
+                        dto.setHolidayRule(template.getHolidayRule());
+                        
+                        return dto;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("获取取消规则失败", e);
+        }
+        
+        return null;
+    }
+    
+    /**
+     * 获取服务政策
+     * @param quote 报价信息
+     * @return 服务政策
+     */
+    private ServicePolicyTemplateResponse getServicePolicy(Quote quote) {
+        try {
+            // 获取商品信息
+            ApiResponse<CarModelProductResponse> productResponse = productClient.getProductByStoreAndModel(
+                quote.getStoreId(), quote.getModelId());
+            
+            if (productResponse != null && productResponse.getData() != null) {
+                CarModelProductResponse product = productResponse.getData();
+                
+                // 如果商品有关联的服务政策模板ID
+                if (product.getServicePolicyTemplateId() != null) {
+                    ApiResponse<ServicePolicyTemplateResponse> templateResponse = 
+                        productClient.getServicePolicyTemplateById(product.getServicePolicyTemplateId());
+                    
+                    if (templateResponse != null && templateResponse.getData() != null) {
+                        ServicePolicyTemplateResponse template = templateResponse.getData();
+                        
+                        ServicePolicyTemplateResponse dto = new ServicePolicyTemplateResponse();
+                        dto.setId(template.getId());
+                        dto.setTemplateName(template.getTemplateName());
+                        dto.setMileageLimit(template.getMileageLimit());
+                        dto.setEarlyPickup(template.getEarlyPickup());
+                        dto.setLatePickup(template.getLatePickup());
+                        dto.setEarlyReturn(template.getEarlyReturn());
+                        dto.setRenewal(template.getRenewal());
+                        dto.setForcedRenewal(template.getForcedRenewal());
+                        dto.setPickupMaterials(template.getPickupMaterials());
+                        dto.setCityRestriction(template.getCityRestriction());
+                        dto.setUsageAreaLimit(template.getUsageAreaLimit());
+                        dto.setFuelFee(template.getFuelFee());
+                        dto.setPersonalBelongingsLoss(template.getPersonalBelongingsLoss());
+                        dto.setViolationHandling(template.getViolationHandling());
+                        dto.setRoadsideAssistance(template.getRoadsideAssistance());
+                        dto.setForcedRecovery(template.getForcedRecovery());
+                        dto.setEtcFee(template.getEtcFee());
+                        dto.setCleaningFee(template.getCleaningFee());
+                        dto.setInvoiceInfo(template.getInvoiceInfo());
+                        
+                        return dto;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("获取服务政策失败", e);
+        }
+        
+        return null;
     }
     
     /**
@@ -251,6 +411,7 @@ public class PricingServiceImpl implements PricingService {
         Quote quote = new Quote();
         quote.setId(generateQuoteId());
         quote.setProductId(product.getId());
+        quote.setTenantId(product.getTenantId());
         quote.setProductName(product.getProductName());
         quote.setModelId(product.getCarModelId());
         quote.setStoreId(store.getId());
@@ -284,7 +445,7 @@ public class PricingServiceImpl implements PricingService {
             
             BigDecimal pickupFee = BigDecimal.ZERO;
             BigDecimal returnFee = BigDecimal.ZERO;
-            String deliveryType = "用户到店自取"; // 默认为到店自取
+            PickupType deliveryType = PickupType.PICKUP_TYPE_STORE; // 默认为到店自取
             
             if (serviceAreasResponse != null && serviceAreasResponse.getData() != null) {
                 List<ServiceAreaResponse> serviceAreas = serviceAreasResponse.getData();
@@ -303,7 +464,7 @@ public class PricingServiceImpl implements PricingService {
                 
                 // 如果找到了上门服务区域，则设置为上门取送车
                 if (pickupArea != null && returnArea != null) {
-                    deliveryType = "上门取送车";
+                    deliveryType = PickupType.PICKUP_TYPE_SEND;
                     pickupFee = new BigDecimal(pickupArea.getDeliveryFee())
                         .divide(new BigDecimal(100));
                     returnFee = new BigDecimal(returnArea.getDeliveryFee())
@@ -313,9 +474,19 @@ public class PricingServiceImpl implements PricingService {
             
             quote.setPickupFee(pickupFee);
             quote.setReturnFee(returnFee);
-            quote.setDeliveryType(deliveryType);
+            quote.setDeliveryType(deliveryType.getDescription());
             
-            // 计算总价格
+            // 计算押金信息
+            // 车损押金和违章押金从商品信息中获取，转换为元
+            BigDecimal damageDeposit = new BigDecimal(product.getDamageDeposit())
+                .divide(new BigDecimal(100));
+            BigDecimal violationDeposit = new BigDecimal(product.getViolationDeposit())
+                .divide(new BigDecimal(100));
+            
+            quote.setDamageDeposit(damageDeposit);
+            quote.setViolationDeposit(violationDeposit);
+            
+            // 计算总价格（不包含押金，押金只是冻结金额）
             BigDecimal totalPrice = dailyRate
                 .add(pickupFee)
                 .add(returnFee)

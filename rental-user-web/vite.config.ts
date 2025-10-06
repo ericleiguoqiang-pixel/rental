@@ -9,9 +9,8 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8096',
-        changeOrigin: true,
-        rewrite: (path) => path
+        target: 'http://localhost:8090', // 网关地址
+        changeOrigin: true
       }
     }
   },

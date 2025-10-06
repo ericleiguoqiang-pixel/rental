@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>高德地图测试</title>
+    <style>
+        #container {
+            width: 100%;
+            height: 500px;
+        }
+    </style>
+    <!-- 高德地图API -->
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=5ae468fd6b5300799030748912112112&plugin=AMap.Geocoder"></script>
+</head>
+<body>
+    <h1>高德地图API测试</h1>
+    <div id="container"></div>
+    <div id="result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc;">
+        <p>点击地图上的任意位置测试逆地理编码功能</p>
+        <p id="address">地址信息将显示在这里</p>
+    </div>
+
+    <script>
+        let map;
+        let geocoder;
+
+        // 初始化地图
+        function initMap() {
+            map = new AMap.Map('container', {
+                zoom: 11,
+                center: [116.397428, 39.90923] // 默认北京中心
+            });
+
+            // 创建地理编码服务实例
+            geocoder = new AMap.Geocoder({
+                city: '全国'
+            });
+
+            // 添加点击事件监听器
+            map.on('click', function(e) {
+                const lng = e.lnglat.getLng();
+                const lat = e.lnglat.getLat();
+                
+                // 执行逆地理编码
+                reverseGeocode(lng, lat);
+            });
+        }
+
+        // 逆地理编码获取地址信息
+        function reverseGeocode(lng, lat) {
+            geocoder.getAddress([lng, lat], function(status, result) {
+                if (status === 'complete' && result.regeocode) {
+                    const address = result.regeocode.formattedAddress;
+                    document.getElementById('address').innerHTML = 
+                        `经度: ${lng.toFixed(6)}<br/>纬度: ${lat.toFixed(6)}<br/>地址: ${address}`;
+                } else {
+                    document.getElementById('address').innerHTML = '逆地理编码失败';
+                }
+            });
+        }
+
+        // 页面加载完成后初始化地图
+        window.onload = function() {
+            initMap();
+        };
+    </script>
+</body>
+</html>

@@ -58,25 +58,9 @@ public class BaseDataController implements BaseDataClient {
             @RequestParam("latitude") Double latitude,
             @RequestParam("distance") Double distance) {
         // 获取指定范围内的门店
-        List<com.rental.saas.basedata.dto.response.StoreResponse> stores = storeService.getStoresInRange(longitude, latitude, distance);
-        List<StoreResponse> storeResponses = stores.stream().map(store -> {
-            StoreResponse response = new StoreResponse();
-            // 手动复制属性，因为两个StoreResponse类不同
-            response.setId(store.getId());
-            response.setStoreName(store.getStoreName());
-            response.setCity(store.getCity());
-            response.setAddress(store.getAddress());
-            response.setLongitude(store.getLongitude());
-            response.setLatitude(store.getLatitude());
-            response.setBusinessStartTime(store.getBusinessStartTime());
-            response.setBusinessEndTime(store.getBusinessEndTime());
-            response.setMinAdvanceHours(store.getMinAdvanceHours());
-            response.setMaxAdvanceDays(store.getMaxAdvanceDays());
-            response.setServiceFee(store.getServiceFee());
-            return response;
-        }).collect(Collectors.toList());
+        List<StoreResponse> stores = storeService.getStoresInRange(longitude, latitude, distance);
         
-        return ApiResponse.success("查询成功", storeResponses);
+        return ApiResponse.success("查询成功", stores);
     }
     
     @Override

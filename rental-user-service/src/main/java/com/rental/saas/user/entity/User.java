@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
  * 用户实体类
  */
 @Data
-@TableName("user")
+@TableName("rental_user")
 @Schema(description = "用户表")
 public class User {
     

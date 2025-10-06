@@ -21,10 +21,17 @@ spring:
       
       # 路由配置
       routes:
-        - id: user-service
+        - id: user-service1
           uri: lb://rental-user-service
           predicates:
-            - Path=/api/auth/**,/api/users/**,/api/employees/**,/api/merchants/**,/api/operation/auth/**,/api/operation/merchants/**
+            - Path=/api/user/**
+          filters:
+              - StripPrefix=0
+
+        - id: user-service2
+          uri: lb://rental-user-service
+          predicates:
+            - Path=/api/auth/**,/api/employees/**,/api/merchants/**,/api/operation/auth/**,/api/operation/merchants/**
           filters:
             - StripPrefix=0
         
@@ -41,8 +48,16 @@ spring:
             - Path=/api/car-model-products/**,/api/value-added-service-templates/**,/api/cancellation-rule-templates/**,/api/service-policy-templates/**,/api/special-pricings/**,/api/product-vehicle-relations/**
           filters:
             - StripPrefix=0
+
+        - id: order-service1
+          uri: lb://rental-order-service
+          predicates:
+            - Path=/api/user-orders/**
+          filters:
+            - StripPrefix=0
+            - RewritePath=/api/user-orders(?<segment>.*), /api/orders$\{segment}
         
-        - id: order-service
+        - id: order-service2
           uri: lb://rental-order-service
           predicates:
             - Path=/api/orders/**,/api/rentals/**

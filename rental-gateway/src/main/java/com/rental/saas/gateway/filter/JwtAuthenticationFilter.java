@@ -3,6 +3,7 @@ package com.rental.saas.gateway.filter;
 import com.rental.saas.common.utils.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -24,11 +25,13 @@ import java.util.List;
  * @author Rental SaaS Team
  */
 @Slf4j
-@Component
-public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
+public class JwtAuthenticationFilter implements GatewayFilter, Ordered {
 
-    @Autowired
     private JwtUtil jwtUtil;
+
+    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     /**
      * 白名单路径，无需认证
@@ -36,8 +39,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     private static final List<String> WHITE_LIST = Arrays.asList(
             "/api/auth/login",
             "/api/auth/refresh",
-            "/api/auth/refresh",
             "/api/auth/captcha",
+            "/api/user/login",  // 用户端登录接口
             "/api/merchants/apply",
             "/api/car-models",  // 车型查询API - 基础数据，无需认证
             "/api/operation/auth/login", // 运营MIS登录接口
@@ -50,6 +53,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
+
+        System.out.println("处理商户端请求: " + path);
         
         // 检查是否在白名单中
         if (isWhiteListPath(path)) {

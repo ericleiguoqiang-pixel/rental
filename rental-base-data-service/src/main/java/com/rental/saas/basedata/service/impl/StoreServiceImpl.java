@@ -2,9 +2,9 @@ package com.rental.saas.basedata.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.rental.api.basedata.response.StoreResponse;
 import com.rental.saas.basedata.dto.request.StoreCreateRequest;
 import com.rental.saas.basedata.dto.request.StoreUpdateRequest;
-import com.rental.saas.basedata.dto.response.StoreResponse;
 import com.rental.saas.basedata.entity.Store;
 import com.rental.saas.basedata.mapper.StoreMapper;
 import com.rental.saas.basedata.service.StoreService;

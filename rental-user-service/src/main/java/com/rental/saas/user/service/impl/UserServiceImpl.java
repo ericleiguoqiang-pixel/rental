@@ -2,6 +2,7 @@ package com.rental.saas.user.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.rental.saas.common.utils.JwtUtil;
 import com.rental.saas.user.dto.UserLoginRequest;
 import com.rental.saas.user.dto.UserLoginResponse;
 import com.rental.saas.user.entity.User;
@@ -10,12 +11,15 @@ import com.rental.saas.user.service.UserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 用户服务实现类
@@ -23,11 +27,14 @@ import java.util.Date;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     
-    @Value("${jwt.secret:rental-secret-key}")
+    @Value("${app.jwt.secret:rental-secret-key}")
     private String jwtSecret;
     
-    @Value("${jwt.expiration:86400000}")
+    @Value("${app.jwt.access-token-expiration:86400000}")
     private Long jwtExpiration;
+
+    @Autowired
+    private JwtUtil jwtUtil;
     
     /**
      * 用户登录
@@ -46,13 +53,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (user == null) {
             user = createUser(request.getPhone());
         }
+
+        // 构建令牌声明
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("employeeName", user.getPhone());
+
+        // 生成访问令牌和刷新令牌
+        String accessToken = jwtUtil.generateAccessToken(
+                user.getId(),
+                user.getPhone(),
+                0L,
+                claims
+        );
+        //String refreshToken = jwtUtil.generateRefreshToken(employee.getId());
         
         // 生成JWT令牌
-        String token = generateToken(user);
+        //String token = generateToken(user);
         
         // 构造响应
         UserLoginResponse response = new UserLoginResponse();
-        response.setToken(token);
+        response.setToken(accessToken);
         
         UserLoginResponse.UserInfo userInfo = new UserLoginResponse.UserInfo();
         userInfo.setId(user.getId());

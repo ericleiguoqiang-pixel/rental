@@ -15,6 +15,9 @@ public class CarModelProductResponse {
     
     @Schema(description = "门店ID")
     private Long storeId;
+
+    @Schema(description = "租户ID")
+    private Long tenantId;
     
     @Schema(description = "车型ID")
     private Long carModelId;

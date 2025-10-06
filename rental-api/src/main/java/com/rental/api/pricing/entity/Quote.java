@@ -1,9 +1,8 @@
-package com.rental.saas.pricing.entity;
+package com.rental.api.pricing.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 /**
  * 报价实体类
@@ -14,6 +13,9 @@ public class Quote {
     
     @Schema(description = "报价ID")
     private String id;
+
+    @Schema(description = "租户ID")
+    private Long tenantId;
     
     @Schema(description = "商品ID")
     private Long productId;
@@ -53,6 +55,12 @@ public class Quote {
     
     @Schema(description = "取还方式：上门取送车/用户到店自取")
     private String deliveryType;
+    
+    @Schema(description = "车损押金")
+    private BigDecimal damageDeposit;
+    
+    @Schema(description = "违章押金")
+    private BigDecimal violationDeposit;
     
 //    @Schema(description = "创建时间")
 //    private LocalDateTime createdAt;

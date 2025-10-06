@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 /**
@@ -15,9 +16,12 @@ public class StoreResponse {
     
     @Schema(description = "门店ID")
     private Long id;
-    
+
     @Schema(description = "门店名称")
     private String storeName;
+
+    @Schema(description = "商户ID")
+    private Long tenantId;
     
     @Schema(description = "所在城市")
     private String city;
@@ -45,4 +49,22 @@ public class StoreResponse {
     
     @Schema(description = "车行手续费(分)")
     private Integer serviceFee;
+
+    @Schema(description = "门店审核状态")
+    private Integer auditStatus;
+
+    @Schema(description = "门店审核状态描述")
+    private String auditStatusDesc;
+
+    @Schema(description = "门店状态")
+    private Integer onlineStatus;
+
+    @Schema(description = "门店状态描述")
+    private String onlineStatusDesc;
+
+    @Schema(description = "创建时间", example = "2024-01-01 12:00:00")
+    private LocalDateTime createdTime;
+
+    @Schema(description = "更新时间", example = "2024-01-01 12:00:00")
+    private LocalDateTime updatedTime;
 }
