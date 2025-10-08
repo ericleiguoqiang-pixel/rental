@@ -1,6 +1,8 @@
 package com.rental.saas.basedata.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rental.api.basedata.response.StoreResponse;
 import com.rental.saas.basedata.dto.request.StoreCreateRequest;
@@ -18,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -241,143 +245,130 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public int countStores(Long tenantId) {
-        return storeMapper.countByTenantId(tenantId);
+        LambdaQueryWrapper<Store> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Store::getTenantId, tenantId);
+        queryWrapper.eq(Store::getDeleted, 0);
+        return Math.toIntExact(storeMapper.selectCount(queryWrapper));
+    }
+    
+    @Override
+    public int countPendingStores() {
+        LambdaQueryWrapper<Store> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Store::getAuditStatus, 0); // 0表示待审核
+        return Math.toIntExact(storeMapper.selectCount(queryWrapper));
+    }
+    
+    @Override
+    public Map<String, Integer> countStoresByAuditStatus() {
+        QueryWrapper<Store> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("audit_status as status", "COUNT(*) as count");
+        queryWrapper.groupBy("audit_status");
+        
+        List<Map<String, Object>> result = storeMapper.selectMaps(queryWrapper);
+        Map<String, Integer> statusCount = new HashMap<>();
+        
+        for (Map<String, Object> row : result) {
+            Object statusObj = row.get("status");
+            Object countObj = row.get("count");
+            
+            if (statusObj != null && countObj != null) {
+                Integer status = ((Number) statusObj).intValue();
+                Integer count = ((Number) countObj).intValue();
+                statusCount.put(status.toString(), count);
+            }
+        }
+        
+        return statusCount;
     }
 
     @Override
     public boolean checkStoreNameExists(String storeName, Long tenantId, Long excludeId) {
-        int count = storeMapper.checkStoreNameExists(storeName, tenantId, excludeId);
-        return count > 0;
+        LambdaQueryWrapper<Store> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Store::getStoreName, storeName);
+        queryWrapper.eq(Store::getTenantId, tenantId);
+        if (excludeId != null) {
+            queryWrapper.ne(Store::getId, excludeId);
+        }
+        return storeMapper.selectCount(queryWrapper) > 0;
     }
-
+    
+    @Override
+    public IPage<Store> getPendingStores(Integer current, Integer size) {
+        LambdaQueryWrapper<Store> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Store::getAuditStatus, 0); // 0表示待审核
+        queryWrapper.orderByDesc(Store::getCreatedTime);
+        
+        Page<Store> page = new Page<>(current, size);
+        return storeMapper.selectPage(page, queryWrapper);
+    }
+    
+    @Override
+    public IPage<Store> getAllStores(Integer current, Integer size, String status) {
+        LambdaQueryWrapper<Store> queryWrapper = new LambdaQueryWrapper<>();
+        if (status != null) {
+            queryWrapper.eq(Store::getAuditStatus, "APPROVED".equals(status) ? 1 : 
+                           "REJECTED".equals(status) ? 2 : 0);
+        }
+        queryWrapper.orderByDesc(Store::getCreatedTime);
+        
+        Page<Store> page = new Page<>(current, size);
+        return storeMapper.selectPage(page, queryWrapper);
+    }
+    
+    @Override
+    public Store getById(Long id) {
+        return storeMapper.selectById(id);
+    }
+    
+    @Override
+    public boolean auditStore(Long id, String status, String reason) {
+        Store store = storeMapper.selectById(id);
+        if (store == null) {
+            return false;
+        }
+        
+        Integer auditStatus;
+        switch (status) {
+            case "APPROVED":
+                auditStatus = 1; // 审核通过
+                break;
+            case "REJECTED":
+                auditStatus = 2; // 审核拒绝
+                break;
+            default:
+                auditStatus = 0; // 待审核
+                break;
+        }
+        
+        store.setAuditStatus(auditStatus);
+        store.setAuditRemark(reason);
+        store.setUpdatedTime(LocalDateTime.now());
+        
+        return storeMapper.updateById(store) > 0;
+    }
+    
     /**
-     * 获取门店实体
+     * 根据ID和租户ID获取门店实体
      */
     private Store getStoreEntity(Long id, Long tenantId) {
-        LambdaQueryWrapper<Store> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Store::getId, id)
-               .eq(Store::getTenantId, tenantId)
-               .eq(Store::getDeleted, 0);
+        LambdaQueryWrapper<Store> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Store::getId, id);
+        queryWrapper.eq(Store::getTenantId, tenantId);
+        queryWrapper.eq(Store::getDeleted, 0);
         
-        Store store = storeMapper.selectOne(wrapper);
+        Store store = storeMapper.selectOne(queryWrapper);
         if (store == null) {
             throw new BusinessException(ResponseCode.STORE_NOT_FOUND);
         }
         return store;
     }
-
+    
     /**
      * 转换为响应对象
      */
     private StoreResponse convertToResponse(Store store) {
         StoreResponse response = new StoreResponse();
         BeanUtils.copyProperties(store, response);
-        
-        // 设置状态描述
-        response.setAuditStatusDesc(getAuditStatusDesc(store.getAuditStatus()));
-        response.setOnlineStatusDesc(getOnlineStatusDesc(store.getOnlineStatus()));
-        
-        // TODO: 设置车辆数量统计
-        // response.setVehicleCount(vehicleService.countVehiclesByStore(store.getId()));
-        
         return response;
-    }
-
-    /**
-     * 获取审核状态描述
-     */
-    private String getAuditStatusDesc(Integer status) {
-        switch (status) {
-            case 0: return "待审核";
-            case 1: return "审核通过";
-            case 2: return "审核拒绝";
-            default: return "未知状态";
-        }
-    }
-
-    /**
-     * 获取上架状态描述
-     */
-    private String getOnlineStatusDesc(Integer status) {
-        switch (status) {
-            case 0: return "下架";
-            case 1: return "上架";
-            default: return "未知状态";
-        }
-    }
-    
-    // =============== 运营相关方法 ===============
-    
-    @Override
-    public com.baomidou.mybatisplus.core.metadata.IPage<Store> getPendingStores(Integer current, Integer size) {
-        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Store> wrapper = 
-            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
-        // 只查询待审核的门店（审核状态为0）
-        wrapper.eq(Store::getAuditStatus, 0);
-        wrapper.orderByDesc(Store::getId);
-        
-        com.baomidou.mybatisplus.core.metadata.IPage<Store> page = 
-            new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(current, size);
-        return storeMapper.selectPage(page, wrapper);
-    }
-
-    @Override
-    public com.baomidou.mybatisplus.core.metadata.IPage<Store> getAllStores(Integer current, Integer size, String status) {
-        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Store> wrapper = 
-            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
-        // 根据状态筛选
-        if (status != null && !status.isEmpty()) {
-            try {
-                Integer statusValue = Integer.valueOf(status);
-                wrapper.eq(Store::getAuditStatus, statusValue);
-            } catch (NumberFormatException e) {
-                log.warn("状态参数格式错误: {}", status);
-            }
-        }
-        wrapper.orderByDesc(Store::getId);
-        
-        com.baomidou.mybatisplus.core.metadata.IPage<Store> page = 
-            new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(current, size);
-        return storeMapper.selectPage(page, wrapper);
-    }
-
-    @Override
-    public Store getById(Long id) {
-        return storeMapper.selectById(id);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public boolean auditStore(Long id, String status, String reason) {
-        // 查询门店
-        Store store = storeMapper.selectById(id);
-        if (store == null) {
-            log.warn("门店不存在: id={}", id);
-            return false;
-        }
-
-        // 更新状态
-        Integer statusValue;
-        switch (status) {
-            case "APPROVED":  // 审核通过
-                statusValue = 1;
-                break;
-            case "REJECTED":  // 审核拒绝
-                statusValue = 2;
-                break;
-            default:
-                log.warn("无效的审核状态: {}", status);
-                return false;
-        }
-
-        // 更新门店审核状态
-        store.setAuditStatus(statusValue);
-        store.setAuditRemark(reason);
-        store.setAuditTime(java.time.LocalDateTime.now());
-        // 这里应该设置审核人ID，但运营管理员没有具体ID，暂时设为0
-        store.setAuditorId(0L);
-
-        int result = storeMapper.updateById(store);
-        return result > 0;
     }
 }

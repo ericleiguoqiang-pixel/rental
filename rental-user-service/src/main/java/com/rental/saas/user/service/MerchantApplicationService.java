@@ -7,6 +7,8 @@ import com.rental.saas.user.dto.request.MerchantApplicationRequest;
 import com.rental.saas.user.dto.response.MerchantApplicationResponse;
 import com.rental.saas.user.entity.MerchantApplication;
 
+import java.util.Map;
+
 /**
  * 商户入驻申请服务接口
  * 
@@ -39,20 +41,24 @@ public interface MerchantApplicationService extends IService<MerchantApplication
      * 根据申请编号查询商户入驻申请
      */
     MerchantApplicationResponse getApplicationByNo(String applicationNo);
-
+    
     /**
      * 获取待审核商户申请列表（分页）
      */
     IPage<MerchantApplication> getPendingApplications(Integer current, Integer size);
-
+    
     /**
      * 获取所有商户申请列表（分页）
      */
     IPage<MerchantApplication> getAllApplications(Integer current, Integer size, String status);
-
+    
     /**
-     * 根据ID获取商户申请
+     * 统计待审核商户申请数量
      */
-    MerchantApplication getById(Long id);
-
+    int countPendingApplications();
+    
+    /**
+     * 统计各状态商户申请数量
+     */
+    Map<String, Integer> countApplicationsByStatus();
 }

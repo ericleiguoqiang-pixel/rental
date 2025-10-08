@@ -9,17 +9,17 @@ import {
   ClockCircleOutlined 
 } from '@ant-design/icons';
 import MainLayout from '../../components/MainLayout';
-// import { operationDashboardAPI } from '../../services/api';
+import { operationDashboardAPI } from '../../services/api';
 
 const { Title } = Typography;
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const [stats] = useState({
-    pendingMerchants: 12,
-    pendingVehicles: 25,
-    pendingStores: 8,
-    totalAudits: 145
+  const [stats, setStats] = useState({
+    pendingMerchants: 0,
+    pendingVehicles: 0,
+    pendingStores: 0,
+    totalAudits: 0
   });
 
   // 模拟待处理事项数据
@@ -123,14 +123,16 @@ const Dashboard: React.FC = () => {
     const loadDashboardData = async () => {
       setLoading(true);
       try {
-        // 这里应该调用实际的API
-        // const response = await operationDashboardAPI.getOverviewStats();
-        // setStats(response.data);
-        
-        // 模拟延迟
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // 调用实际的API获取运营概览数据
+        const response = await operationDashboardAPI.getOverviewStats();
+        if (response && response.code === 200 && response.data) {
+          setStats(response.data);
+        } else {
+          message.error('获取运营数据失败');
+        }
       } catch (error: any) {
-        message.error('加载数据失败：' + error.message);
+        message.error('加载数据失败：' + (error.message || '未知错误'));
+        console.error('加载运营数据失败:', error);
       } finally {
         setLoading(false);
       }

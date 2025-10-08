@@ -103,6 +103,16 @@ public interface VehicleService {
      * 统计各状态车辆数量
      */
     Map<String, Integer> countVehiclesByStatus(Long tenantId);
+    
+    /**
+     * 统计待审核车辆数量
+     */
+    int countPendingVehicles();
+    
+    /**
+     * 统计各状态车辆数量（运营）
+     */
+    Map<String, Integer> countVehiclesByAuditStatus();
 
     /**
      * 检查车牌号是否重复

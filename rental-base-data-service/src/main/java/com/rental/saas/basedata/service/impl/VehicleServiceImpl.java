@@ -1,6 +1,7 @@
 package com.rental.saas.basedata.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rental.api.basedata.response.CarModelResponse;
 import com.rental.saas.basedata.dto.request.VehicleCreateRequest;
@@ -308,24 +309,67 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public Map<String, Integer> countVehiclesByStatus(Long tenantId) {
-        List<Object> statusCounts = vehicleMapper.countByVehicleStatus(tenantId);
-        Map<String, Integer> result = new HashMap<>();
+        QueryWrapper<Vehicle> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("vehicle_status", "COUNT(*) as count");
+        queryWrapper.eq("tenant_id", tenantId);
+        queryWrapper.eq("deleted", 0);
+        queryWrapper.groupBy("vehicle_status");
         
-        // 初始化所有状态计数
-        result.put("idle", 0);      // 空闲
-        result.put("rented", 0);    // 租出
-        result.put("maintenance", 0); // 维修
-        result.put("scrapped", 0);  // 报废
+        List<Map<String, Object>> result = vehicleMapper.selectMaps(queryWrapper);
+        Map<String, Integer> statusCount = new HashMap<>();
         
-        // TODO: 处理数据库返回的状态统计结果
+        for (Map<String, Object> row : result) {
+            Object statusObj = row.get("vehicle_status");
+            Object countObj = row.get("count");
+            
+            if (statusObj != null && countObj != null) {
+                Integer status = ((Number) statusObj).intValue();
+                Integer count = ((Number) countObj).intValue();
+                statusCount.put(status.toString(), count);
+            }
+        }
         
-        return result;
+        return statusCount;
+    }
+    
+    @Override
+    public int countPendingVehicles() {
+        LambdaQueryWrapper<Vehicle> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Vehicle::getAuditStatus, 0); // 0表示待审核
+        return Math.toIntExact(vehicleMapper.selectCount(queryWrapper));
+    }
+    
+    @Override
+    public Map<String, Integer> countVehiclesByAuditStatus() {
+        QueryWrapper<Vehicle> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("audit_status as status", "COUNT(*) as count");
+        queryWrapper.groupBy("audit_status");
+        
+        List<Map<String, Object>> result = vehicleMapper.selectMaps(queryWrapper);
+        Map<String, Integer> statusCount = new HashMap<>();
+        
+        for (Map<String, Object> row : result) {
+            Object statusObj = row.get("status");
+            Object countObj = row.get("count");
+            
+            if (statusObj != null && countObj != null) {
+                Integer status = ((Number) statusObj).intValue();
+                Integer count = ((Number) countObj).intValue();
+                statusCount.put(status.toString(), count);
+            }
+        }
+        
+        return statusCount;
     }
 
     @Override
     public boolean checkLicensePlateExists(String licensePlate, Long excludeId) {
-        int count = vehicleMapper.checkLicensePlateExists(licensePlate, excludeId);
-        return count > 0;
+        LambdaQueryWrapper<Vehicle> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Vehicle::getLicensePlate, licensePlate);
+        if (excludeId != null) {
+            queryWrapper.ne(Vehicle::getId, excludeId);
+        }
+        return vehicleMapper.selectCount(queryWrapper) > 0;
     }
 
     @Override

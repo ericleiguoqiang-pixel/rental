@@ -23,6 +23,13 @@
             <version>${project.version}</version>
         </dependency>
         
+        <!-- API模块 -->
+        <dependency>
+            <groupId>com.rental.saas</groupId>
+            <artifactId>rental-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
         <!-- Spring Boot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -39,6 +46,12 @@
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+        
+        <!-- Spring Cloud OpenFeign -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
         
         <!-- 数据库相关 -->

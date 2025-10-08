@@ -279,4 +279,44 @@ public class OrderController {
             return ApiResponse.error("处理支付成功回调失败: " + e.getMessage());
         }
     }
+    
+    /**
+     * 统计租户今日订单数
+     */
+    @GetMapping("/count/today")
+    @Operation(summary = "统计租户今日订单数", description = "统计指定租户今日订单数")
+    public ApiResponse<Integer> countTodayOrdersByTenantId(
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
+        
+        log.info("统计租户今日订单数: tenantId={}", tenantId);
+        
+        try {
+            int count = orderService.countTodayOrdersByTenantId(tenantId);
+            log.info("统计租户今日订单数成功: tenantId={}, count={}", tenantId, count);
+            return ApiResponse.success(count);
+        } catch (Exception e) {
+            log.error("统计租户今日订单数失败: tenantId={}, error={}", tenantId, e.getMessage(), e);
+            return ApiResponse.error("统计租户今日订单数失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 统计租户今日收入
+     */
+    @GetMapping("/revenue/today")
+    @Operation(summary = "统计租户今日收入", description = "统计指定租户今日收入")
+    public ApiResponse<Double> sumTodayRevenueByTenantId(
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
+        
+        log.info("统计租户今日收入: tenantId={}", tenantId);
+        
+        try {
+            double revenue = orderService.sumTodayRevenueByTenantId(tenantId);
+            log.info("统计租户今日收入成功: tenantId={}, revenue={}", tenantId, revenue);
+            return ApiResponse.success(revenue);
+        } catch (Exception e) {
+            log.error("统计租户今日收入失败: tenantId={}, error={}", tenantId, e.getMessage(), e);
+            return ApiResponse.error("统计租户今日收入失败: " + e.getMessage());
+        }
+    }
 }

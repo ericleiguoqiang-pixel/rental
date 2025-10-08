@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 基础数据服务Feign客户端
@@ -53,4 +54,34 @@ public interface BaseDataClient {
     @GetMapping("/api/feign/service-areas/store/{storeId}")
     ApiResponse<List<ServiceAreaResponse>> getServiceAreasByStore(
             @PathVariable("storeId") Long storeId);
+            
+    /**
+     * 统计各状态车辆数量
+     */
+    @GetMapping("/api/feign/vehicles/count/status")
+    ApiResponse<Map<String, Integer>> countVehiclesByStatus(@RequestHeader("X-Tenant-Id") Long tenantId);
+    
+    /**
+     * 统计待审核车辆数量
+     */
+    @GetMapping("/api/feign/vehicles/count/pending")
+    ApiResponse<Integer> countPendingVehicles();
+    
+    /**
+     * 统计待审核门店数量
+     */
+    @GetMapping("/api/feign/stores/count/pending")
+    ApiResponse<Integer> countPendingStores();
+    
+    /**
+     * 统计各状态车辆数量（运营）
+     */
+    @GetMapping("/api/feign/operation/vehicles/count/status")
+    ApiResponse<Map<String, Integer>> countVehiclesByAuditStatus();
+    
+    /**
+     * 统计各状态门店数量（运营）
+     */
+    @GetMapping("/api/feign/operation/stores/count/status")
+    ApiResponse<Map<String, Integer>> countStoresByAuditStatus();
 }

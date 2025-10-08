@@ -20,6 +20,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 门店管理控制器
@@ -155,6 +156,23 @@ public class StoreController {
     public ApiResponse<Integer> countStores(@RequestHeader("X-Tenant-Id") Long tenantId) {
         int count = storeService.countStores(tenantId);
         return ApiResponse.success("查询成功", count);
+    }
+
+    @GetMapping("/count/pending")
+    @Operation(summary = "统计待审核门店数量", description = "统计待审核门店数量")
+    public ApiResponse<Integer> countPendingStores() {
+        int count = storeService.countPendingStores();
+        return ApiResponse.success("查询成功", count);
+    }
+    
+    /**
+     * 统计各状态门店数量（运营）
+     */
+    @GetMapping("/operation/count/status")
+    @Operation(summary = "统计各状态门店数量（运营）", description = "统计各状态门店数量（运营）")
+    public ApiResponse<Map<String, Integer>> countStoresByAuditStatus() {
+        Map<String, Integer> statusCount = storeService.countStoresByAuditStatus();
+        return ApiResponse.success("查询成功", statusCount);
     }
 
     @GetMapping("/check-name")

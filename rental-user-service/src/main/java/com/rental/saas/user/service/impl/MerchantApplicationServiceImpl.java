@@ -2,6 +2,7 @@ package com.rental.saas.user.service.impl;
 
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -29,7 +30,9 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -127,7 +130,37 @@ public class MerchantApplicationServiceImpl extends ServiceImpl<MerchantApplicat
         log.info("商户入驻申请审核完成: id={}, status={}", id, status);
         return true;
     }
-
+    
+    @Override
+    public int countPendingApplications() {
+        LambdaQueryWrapper<MerchantApplication> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MerchantApplication::getApplicationStatus, ApplicationStatus.PENDING.getCode());
+        return Math.toIntExact(count(queryWrapper));
+    }
+    
+    @Override
+    public Map<String, Integer> countApplicationsByStatus() {
+        QueryWrapper<MerchantApplication> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("application_status as status", "COUNT(*) as count");
+        queryWrapper.groupBy("application_status");
+        
+        List<Map<String, Object>> result = listMaps(queryWrapper);
+        Map<String, Integer> statusCount = new HashMap<>();
+        
+        for (Map<String, Object> row : result) {
+            Object statusObj = row.get("status");
+            Object countObj = row.get("count");
+            
+            if (statusObj != null && countObj != null) {
+                Integer status = ((Number) statusObj).intValue();
+                Integer count = ((Number) countObj).intValue();
+                statusCount.put(status.toString(), count);
+            }
+        }
+        
+        return statusCount;
+    }
+    
     @Override
     public PageResponse<MerchantApplicationResponse> pageApplications(Integer pageNum, Integer pageSize,
                                                                       Integer status, String keyword) {
@@ -301,11 +334,6 @@ public class MerchantApplicationServiceImpl extends ServiceImpl<MerchantApplicat
 
         Page<MerchantApplication> page = new Page<>(current, size);
         return merchantApplicationMapper.selectPage(page, wrapper);
-    }
-
-    @Override
-    public MerchantApplication getById(Long id) {
-        return merchantApplicationMapper.selectById(id);
     }
 
 }

@@ -296,3 +296,36 @@ export const carModelAPI = {
     return request(`/operation/car-models/brand/${brand}`);
   }
 };
+
+// 用户管理API
+export const userManagementAPI = {
+  // 分页获取用户列表
+  getUserList: async (params?: any) => {
+    // 过滤掉值为undefined的参数
+    const filteredParams: Record<string, any> = {};
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined) {
+          filteredParams[key] = params[key];
+        }
+      });
+    }
+    
+    const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
+    return request(`/operation/users${queryString ? '?' + queryString : ''}`);
+  },
+  
+  // 获取用户详情
+  getUserDetail: async (id: number) => {
+    return request(`/operation/users/${id}`);
+  },
+  
+  // 更新用户状态
+  updateUserStatus: async (id: number, status: number) => {
+    const params = new URLSearchParams();
+    params.append('status', status.toString());
+    return request(`/operation/users/${id}/status?${params.toString()}`, {
+      method: 'PUT'
+    });
+  }
+};

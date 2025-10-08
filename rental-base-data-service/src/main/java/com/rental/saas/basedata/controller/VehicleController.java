@@ -179,10 +179,27 @@ public class VehicleController {
         return ApiResponse.success("查询成功", count);
     }
 
+    @GetMapping("/count/pending")
+    @Operation(summary = "统计待审核车辆数量", description = "统计待审核车辆数量")
+    public ApiResponse<Integer> countPendingVehicles() {
+        int count = vehicleService.countPendingVehicles();
+        return ApiResponse.success("查询成功", count);
+    }
+
     @GetMapping("/count/status")
     @Operation(summary = "统计各状态车辆数量", description = "统计租户各状态车辆数量")
     public ApiResponse<Map<String, Integer>> countVehiclesByStatus(@RequestHeader("X-Tenant-Id") Long tenantId) {
         Map<String, Integer> statusCount = vehicleService.countVehiclesByStatus(tenantId);
+        return ApiResponse.success("查询成功", statusCount);
+    }
+    
+    /**
+     * 统计各状态车辆数量（运营）
+     */
+    @GetMapping("/operation/count/status")
+    @Operation(summary = "统计各状态车辆数量（运营）", description = "统计各状态车辆数量（运营）")
+    public ApiResponse<Map<String, Integer>> countVehiclesByAuditStatus() {
+        Map<String, Integer> statusCount = vehicleService.countVehiclesByAuditStatus();
         return ApiResponse.success("查询成功", statusCount);
     }
 

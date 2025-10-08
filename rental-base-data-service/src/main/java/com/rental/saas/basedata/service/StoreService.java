@@ -8,6 +8,7 @@ import com.rental.saas.basedata.dto.request.StoreUpdateRequest;
 import com.rental.saas.basedata.entity.Store;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 门店服务接口
@@ -78,10 +79,20 @@ public interface StoreService {
     void auditStore(Long id, Integer auditStatus, String auditRemark, Long auditorId);
 
     /**
-     * 统计租户门店数量
+     * 统计门店数量
      */
     int countStores(Long tenantId);
-
+    
+    /**
+     * 统计待审核门店数量
+     */
+    int countPendingStores();
+    
+    /**
+     * 统计各状态门店数量（运营）
+     */
+    Map<String, Integer> countStoresByAuditStatus();
+    
     /**
      * 检查门店名称是否重复
      */

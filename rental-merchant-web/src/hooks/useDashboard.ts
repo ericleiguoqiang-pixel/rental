@@ -33,14 +33,15 @@ export const useDashboardStats = () => {
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : '获取仪表盘数据失败'
       setError(errorMsg)
-      // 如果API调用失败，使用mock数据
+      // 不再使用模拟数据，而是保持之前的状态或使用默认值
       setStats({
-        todayOrders: 12,
-        todayRevenue: 8560,
-        availableVehicles: 28,
-        rentedVehicles: 15,
+        todayOrders: 0,
+        todayRevenue: 0,
+        availableVehicles: 0,
+        rentedVehicles: 0,
       })
-      console.warn('仪表盘API调用失败，使用模拟数据:', errorMsg)
+      message.error('获取仪表盘数据失败: ' + errorMsg)
+      console.error('仪表盘API调用失败:', errorMsg)
     } finally {
       setLoading(false)
     }

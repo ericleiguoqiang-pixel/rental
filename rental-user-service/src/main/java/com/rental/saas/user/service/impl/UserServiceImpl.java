@@ -1,6 +1,8 @@
 package com.rental.saas.user.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.rental.saas.common.utils.JwtUtil;
 import com.rental.saas.user.dto.UserLoginRequest;
@@ -112,6 +114,37 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setUpdatedAt(LocalDateTime.now());
         save(user);
         return user;
+    }
+    
+    /**
+     * 分页获取用户列表
+     * @param current 当前页码
+     * @param size 每页条数
+     * @param phone 手机号
+     * @param nickname 昵称
+     * @param status 状态
+     * @return 用户分页数据
+     */
+    @Override
+    public IPage<User> getUserList(Integer current, Integer size, String phone, String nickname, Integer status) {
+        Page<User> page = new Page<>(current, size);
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        
+        // 添加查询条件
+        if (phone != null && !phone.isEmpty()) {
+            queryWrapper.like("phone", phone);
+        }
+        if (nickname != null && !nickname.isEmpty()) {
+            queryWrapper.like("nickname", nickname);
+        }
+        if (status != null) {
+            queryWrapper.eq("status", status);
+        }
+        
+        // 按创建时间倒序排列
+        queryWrapper.orderByDesc("created_at");
+        
+        return page(page, queryWrapper);
     }
     
     /**

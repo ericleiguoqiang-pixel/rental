@@ -131,4 +131,20 @@ public interface OrderService extends IService<Order> {
      * @return 是否成功
      */
     boolean handlePaymentSuccess(Long orderId, Integer paymentType);
+    
+    /**
+     * 统计租户今日订单数
+     * 
+     * @param tenantId 租户ID
+     * @return 今日订单数
+     */
+    int countTodayOrdersByTenantId(Long tenantId);
+    
+    /**
+     * 统计租户今日收入
+     * 
+     * @param tenantId 租户ID
+     * @return 今日收入
+     */
+    double sumTodayRevenueByTenantId(Long tenantId);
 }

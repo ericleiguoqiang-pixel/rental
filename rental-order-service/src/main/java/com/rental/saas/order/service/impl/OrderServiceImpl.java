@@ -1,6 +1,7 @@
 package com.rental.saas.order.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -22,7 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 /**
  * 订单服务实现类
@@ -81,19 +85,19 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             }
             
             // 设置金额信息（从元转换为分）
-            order.setBasicRentalFee(request.getTotalAmount() * 100);
-            order.setOrderAmount(request.getTotalAmount() * 100);
-            order.setDamageDeposit(request.getDamageDeposit() * 100);
-            order.setViolationDeposit(request.getViolationDeposit() * 100);
+            order.setBasicRentalFee(request.getTotalAmount().intValue() * 100);
+            order.setOrderAmount(request.getTotalAmount().intValue() * 100);
+            order.setDamageDeposit(request.getDamageDeposit().intValue() * 100);
+            order.setViolationDeposit(request.getViolationDeposit().intValue() * 100);
             
             // 设置初始状态
-            order.setOrderStatus(OrderStatus.PENDING_PAYMENT.getCode());
+            order.setOrderStatus(OrderStatus.PENDING_PAYMENT);
             order.setCreateTime(LocalDateTime.now());
             
             // 设置押金信息
             int actualDeposit = Math.max(
-                request.getDamageDeposit() * 100,
-                request.getViolationDeposit() * 100
+                request.getDamageDeposit().intValue() * 100,
+                request.getViolationDeposit().intValue() * 100
             );
             order.setActualDeposit(actualDeposit);
             
@@ -171,14 +175,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             }
             
             // 检查订单状态是否可以取消
-            OrderStatus currentStatus = OrderStatus.getByCode(order.getOrderStatus());
+            OrderStatus currentStatus = order.getOrderStatusEnum();
             if (!currentStatus.canCancel()) {
                 throw new BusinessException("当前订单状态不支持取消");
             }
             
             // 更新订单状态
             OrderStatus newStatus = OrderStatus.CANCELLED;
-            order.setOrderStatus(newStatus.getCode());
+            order.setOrderStatus(newStatus);
             order.setCancelTime(LocalDateTime.now());
             orderMapper.updateById(order);
             
@@ -314,14 +318,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
         
         // 检查订单状态是否可以确认取车
-        OrderStatus currentStatus = OrderStatus.getByCode(order.getOrderStatus());
+        OrderStatus currentStatus = order.getOrderStatusEnum();
         if (!currentStatus.canPickup()) {
             throw new BusinessException("当前订单状态不支持确认取车");
         }
         
         // 更新订单状态
         OrderStatus newStatus = OrderStatus.PICKED_UP;
-        order.setOrderStatus(newStatus.getCode());
+        order.setOrderStatus(newStatus);
         order.setActualPickupTime(LocalDateTime.now());
         orderMapper.updateById(order);
         
@@ -342,14 +346,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
         
         // 检查订单状态是否可以确认还车
-        OrderStatus currentStatus = OrderStatus.getByCode(order.getOrderStatus());
+        OrderStatus currentStatus = order.getOrderStatusEnum();
         if (!currentStatus.canReturn()) {
             throw new BusinessException("当前订单状态不支持确认还车");
         }
         
         // 更新订单状态
         OrderStatus newStatus = OrderStatus.COMPLETED;
-        order.setOrderStatus(newStatus.getCode());
+        order.setOrderStatus(newStatus);
         order.setActualReturnTime(LocalDateTime.now());
         orderMapper.updateById(order);
         
@@ -374,13 +378,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             }
             
             // 获取当前订单状态
-            OrderStatus currentStatus = OrderStatus.getByCode(order.getOrderStatus());
+            OrderStatus currentStatus = order.getOrderStatusEnum();
             
             // 根据支付类型处理不同的逻辑
             if (paymentType == 1) {
                 // 租车费支付成功，更新订单状态为待取车
                 if (currentStatus == OrderStatus.PENDING_PAYMENT) {
-                    order.setOrderStatus(OrderStatus.PENDING_PICKUP.getCode());
+                    order.setOrderStatus(OrderStatus.PENDING_PICKUP);
                     orderMapper.updateById(order);
                     
                     // 记录状态变更日志
@@ -401,19 +405,49 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             return false;
         }
     }
-
+    
     @Override
-    public void recordStatusChange(Long orderId, OrderStatus oldStatus, OrderStatus newStatus, 
-                                 String changeReason, Long operatorId, String operatorName) {
+    public void recordStatusChange(Long orderId, OrderStatus oldStatus, OrderStatus newStatus, String changeReason, 
+                                 Long operatorId, String operatorName) {
         OrderStatusLog logEntry = new OrderStatusLog();
         logEntry.setOrderId(orderId);
         logEntry.setOldStatus(oldStatus != null ? oldStatus.getCode() : null);
         logEntry.setNewStatus(newStatus.getCode());
         logEntry.setChangeReason(changeReason);
-        logEntry.setOperatorId(operatorId);
-        logEntry.setOperatorName(operatorName);
+        logEntry.setOperatorId(operatorId != null ? operatorId : 0L);
+        logEntry.setOperatorName(operatorName != null ? operatorName : "系统");
         logEntry.setChangeTime(LocalDateTime.now());
         
         orderStatusLogMapper.insert(logEntry);
+    }
+    
+    @Override
+    public int countTodayOrdersByTenantId(Long tenantId) {
+        LocalDateTime startOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        LocalDateTime endOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
+        
+        QueryWrapper<Order> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("tenant_id", tenantId);
+        queryWrapper.between("create_time", startOfDay, endOfDay);
+        
+        return Math.toIntExact(count(queryWrapper));
+    }
+    
+    @Override
+    public double sumTodayRevenueByTenantId(Long tenantId) {
+        LocalDateTime startOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        LocalDateTime endOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
+        
+        QueryWrapper<Order> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("IFNULL(SUM(order_amount), 0) as total");
+        queryWrapper.eq("tenant_id", tenantId);
+        queryWrapper.between("create_time", startOfDay, endOfDay);
+        queryWrapper.eq("order_status", 2); // 已支付状态
+        
+        List<Object> result = listObjs(queryWrapper);
+        if (result != null && !result.isEmpty() && result.get(0) != null) {
+            return Double.parseDouble(result.get(0).toString()) / 100.0; // 转换为元
+        }
+        return 0.0;
     }
 }

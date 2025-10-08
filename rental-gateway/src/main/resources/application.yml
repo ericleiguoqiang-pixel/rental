@@ -26,12 +26,12 @@ spring:
           predicates:
             - Path=/api/user/**
           filters:
-              - StripPrefix=0
+            - StripPrefix=0
 
         - id: user-service2
           uri: lb://rental-user-service
           predicates:
-            - Path=/api/auth/**,/api/employees/**,/api/merchants/**,/api/operation/auth/**,/api/operation/merchants/**
+            - Path=/api/auth/**,/api/employees/**,/api/merchants/**,/api/operation/auth/**,/api/operation/merchants/**,/api/dashboard/**,/api/operation/dashboard/**,/api/operation/users/**
           filters:
             - StripPrefix=0
         

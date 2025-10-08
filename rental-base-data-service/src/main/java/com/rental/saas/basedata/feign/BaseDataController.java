@@ -16,10 +16,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -110,5 +112,40 @@ public class BaseDataController implements BaseDataClient {
         }).collect(Collectors.toList());
         
         return ApiResponse.success("查询成功", areaResponses);
+    }
+    
+    @Override
+    @GetMapping("/api/feign/vehicles/count/status")
+    public ApiResponse<Map<String, Integer>> countVehiclesByStatus(@RequestHeader("X-Tenant-Id") Long tenantId) {
+        Map<String, Integer> vehicleCount = vehicleService.countVehiclesByStatus(tenantId);
+        return ApiResponse.success(vehicleCount);
+    }
+    
+    @Override
+    @GetMapping("/api/feign/vehicles/count/pending")
+    public ApiResponse<Integer> countPendingVehicles() {
+        int count = vehicleService.countPendingVehicles();
+        return ApiResponse.success(count);
+    }
+    
+    @Override
+    @GetMapping("/api/feign/stores/count/pending")
+    public ApiResponse<Integer> countPendingStores() {
+        int count = storeService.countPendingStores();
+        return ApiResponse.success(count);
+    }
+    
+    @Override
+    @GetMapping("/api/feign/operation/vehicles/count/status")
+    public ApiResponse<Map<String, Integer>> countVehiclesByAuditStatus() {
+        Map<String, Integer> vehicleCount = vehicleService.countVehiclesByAuditStatus();
+        return ApiResponse.success(vehicleCount);
+    }
+    
+    @Override
+    @GetMapping("/api/feign/operation/stores/count/status")
+    public ApiResponse<Map<String, Integer>> countStoresByAuditStatus() {
+        Map<String, Integer> storeCount = storeService.countStoresByAuditStatus();
+        return ApiResponse.success(storeCount);
     }
 }

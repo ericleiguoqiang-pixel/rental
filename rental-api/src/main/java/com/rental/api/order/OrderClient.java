@@ -70,4 +70,22 @@ public interface OrderClient {
     ApiResponse<Boolean> handlePaymentSuccess(
         @PathVariable("orderId") Long orderId,
         @RequestParam("paymentType") Integer paymentType);
+        
+    /**
+     * 统计租户今日订单数
+     * 
+     * @param tenantId 租户ID
+     * @return 今日订单数
+     */
+    @GetMapping("/orders/count/today")
+    ApiResponse<Integer> countTodayOrdersByTenantId(@RequestHeader("X-Tenant-Id") Long tenantId);
+    
+    /**
+     * 统计租户今日收入
+     * 
+     * @param tenantId 租户ID
+     * @return 今日收入
+     */
+    @GetMapping("/orders/revenue/today")
+    ApiResponse<Double> sumTodayRevenueByTenantId(@RequestHeader("X-Tenant-Id") Long tenantId);
 }
