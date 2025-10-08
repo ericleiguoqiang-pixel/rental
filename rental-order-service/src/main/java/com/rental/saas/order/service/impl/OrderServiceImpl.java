@@ -91,7 +91,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             order.setViolationDeposit(request.getViolationDeposit().intValue() * 100);
             
             // 设置初始状态
-            order.setOrderStatus(OrderStatus.PENDING_PAYMENT);
+            order.setOrderStatus(OrderStatus.PENDING_PAYMENT.getCode());
             order.setCreateTime(LocalDateTime.now());
             
             // 设置押金信息
@@ -175,14 +175,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             }
             
             // 检查订单状态是否可以取消
-            OrderStatus currentStatus = order.getOrderStatusEnum();
+            OrderStatus currentStatus = OrderStatus.getByCode(order.getOrderStatus());
             if (!currentStatus.canCancel()) {
                 throw new BusinessException("当前订单状态不支持取消");
             }
             
             // 更新订单状态
             OrderStatus newStatus = OrderStatus.CANCELLED;
-            order.setOrderStatus(newStatus);
+            order.setOrderStatus(newStatus.getCode());
             order.setCancelTime(LocalDateTime.now());
             orderMapper.updateById(order);
             
@@ -318,14 +318,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
         
         // 检查订单状态是否可以确认取车
-        OrderStatus currentStatus = order.getOrderStatusEnum();
+        OrderStatus currentStatus = OrderStatus.getByCode(order.getOrderStatus());
         if (!currentStatus.canPickup()) {
             throw new BusinessException("当前订单状态不支持确认取车");
         }
         
         // 更新订单状态
         OrderStatus newStatus = OrderStatus.PICKED_UP;
-        order.setOrderStatus(newStatus);
+        order.setOrderStatus(newStatus.getCode());
         order.setActualPickupTime(LocalDateTime.now());
         orderMapper.updateById(order);
         
@@ -346,14 +346,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
         
         // 检查订单状态是否可以确认还车
-        OrderStatus currentStatus = order.getOrderStatusEnum();
+        OrderStatus currentStatus = OrderStatus.getByCode(order.getOrderStatus());
         if (!currentStatus.canReturn()) {
             throw new BusinessException("当前订单状态不支持确认还车");
         }
         
         // 更新订单状态
         OrderStatus newStatus = OrderStatus.COMPLETED;
-        order.setOrderStatus(newStatus);
+        order.setOrderStatus(newStatus.getCode());
         order.setActualReturnTime(LocalDateTime.now());
         orderMapper.updateById(order);
         
@@ -378,13 +378,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             }
             
             // 获取当前订单状态
-            OrderStatus currentStatus = order.getOrderStatusEnum();
+            OrderStatus currentStatus = OrderStatus.getByCode(order.getOrderStatus());
             
             // 根据支付类型处理不同的逻辑
             if (paymentType == 1) {
                 // 租车费支付成功，更新订单状态为待取车
                 if (currentStatus == OrderStatus.PENDING_PAYMENT) {
-                    order.setOrderStatus(OrderStatus.PENDING_PICKUP);
+                    order.setOrderStatus(OrderStatus.PENDING_PICKUP.getCode());
                     orderMapper.updateById(order);
                     
                     // 记录状态变更日志

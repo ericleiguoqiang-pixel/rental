@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Card, Typography, Button, Space, Input, DatePicker, Select, message } from 'antd';
+import { Table, Card, Typography, Button, Space, Input, Select, message } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { userManagementAPI } from '../../services/api';
 import MainLayout from '../../components/MainLayout';
 
 const { Title } = Typography;
-const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 interface User {
