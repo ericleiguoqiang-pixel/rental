@@ -2,7 +2,13 @@
 
 ## 项目概述
 
-租车SaaS系统是一个多租户的云服务平台，为租车行业提供完整的数字化解决方案。本项目专注于商户端的实现，为租车公司和门店管理人员提供一站式数字化管理平台。
+租车SaaS系统是一个多租户的云服务平台，为租车行业提供完整的数字化解决方案。
+
+## 进展和计划
+- 已完成SaaS端、Mis端和前端h5的基本功能，持续完善中
+- 项目中的代码90%都是AI生成的，我使用阿里的Qoder做为编程工具
+- 后续计划在项目中添加AI相关功能，包括商户可以通过自然语言完成功能设置，运营可以通过自然语言完成审等
+- 也可以提供AI的数据分析、行业动态、竞品比对等
 
 ## 技术架构
 
@@ -16,23 +22,24 @@
 ├── rental-order-service     # 订单服务 (订单管理、状态流转、查询统计)
 ├── rental-payment-service   # 支付服务 (支付接口、退款处理、账单管理)
 ├── rental-common           # 公共模块 (通用工具类、枚举、异常处理)
+├── rental-api              # 公共模块 (服务间API调用接口)
 └── rental-merchant-web     # 商户端前端 (React + Ant Design)
 ```
 
 ### 技术栈
 
-| 层级 | 技术选型 | 版本 |
-|------|----------|------|
-| 前端框架 | React | 18.2.0 |
-| UI组件库 | Ant Design | 5.2.0 |
-| 后端框架 | Spring Boot | 2.7.8 |
-| 微服务治理 | Spring Cloud Alibaba | 2021.0.5.0 |
-| 注册中心 | Nacos | - |
-| 配置中心 | Nacos | - |
-| 网关 | Spring Cloud Gateway | - |
-| 缓存 | Redis | - |
-| 数据库 | MySQL | 8.0 |
-| 消息队列 | RocketMQ | - |
+| 层级 | 技术选型 | 版本         |
+|------|----------|------------|
+| 前端框架 | React | 18.2.0     |
+| UI组件库 | Ant Design | 5.2.0      |
+| 后端框架 | Spring Boot | 3.0.12     |
+| 微服务治理 | Spring Cloud Alibaba | 2022.0.4 |
+| 注册中心 | Nacos | -          |
+| 配置中心 | Nacos | -          |
+| 网关 | Spring Cloud Gateway | -          |
+| 缓存 | Redis | -          |
+| 数据库 | MySQL | 8.0        |
+| 消息队列 | RocketMQ | -          |
 
 ## 高德地图集成
 
@@ -42,7 +49,7 @@
 
 ### 环境要求
 
-- JDK 11+
+- JDK 21+
 - Maven 3.6+
 - Node.js 16+
 - MySQL 8.0+
@@ -57,9 +64,9 @@ rental/
 ├── docs/                    # 文档目录
 │   ├── sql/                # 数据库脚本
 │   └── api/               # API文档
-├── docker/                 # Docker配置
 ├── scripts/               # 部署脚本
 ├── rental-common/         # 公共模块
+├── rental-api/            # API模块
 ├── rental-gateway/        # API网关
 ├── rental-user-service/   # 用户服务
 ├── rental-base-data-service/ # 基础数据服务
@@ -224,6 +231,6 @@ kubectl apply -f k8s/
 
 ## 联系我们
 
-- 项目负责人: [项目负责人邮箱]
-- 技术支持: [技术支持邮箱]
+- 项目负责人: [lgq@vip.qq.com]
+- 技术支持: [lgq@vip.qq.com]
 - 问题反馈: [GitHub Issues](链接)
