@@ -13,7 +13,7 @@ import {
   Descriptions,
   Typography,
   Avatar,
-  Popconfirm,
+
   DatePicker,
   Select,
   Pagination
@@ -57,7 +57,7 @@ interface MerchantApplication {
 }
 
 const MerchantAudit: React.FC = () => {
-  const { loading, data: merchants, pagination, execute, reset } = usePaginationApi<MerchantApplication>();
+  const { loading, data: merchants, pagination, execute } = usePaginationApi<MerchantApplication>();
   const [selectedMerchant, setSelectedMerchant] = useState<MerchantApplication | null>(null);
   const [detailVisible, setDetailVisible] = useState(false);
   const [auditVisible, setAuditVisible] = useState(false);

@@ -22,9 +22,7 @@ import {
   CheckOutlined,
   CloseOutlined,
   SearchOutlined,
-  ShopOutlined,
-  AuditOutlined,
-  EnvironmentOutlined
+  AuditOutlined
 } from '@ant-design/icons';
 import MainLayout from '../../components/MainLayout';
 import { storeAuditAPI } from '../../services/api';
@@ -67,7 +65,7 @@ interface StoreApplication {
 }
 
 const StoreAudit: React.FC = () => {
-  const { loading, data: stores, pagination, execute, reset } = usePaginationApi<StoreApplication>();
+  const { loading, data: stores, pagination, execute } = usePaginationApi<StoreApplication>();
   const [selectedStore, setSelectedStore] = useState<StoreApplication | null>(null);
   const [detailVisible, setDetailVisible] = useState(false);
   const [auditVisible, setAuditVisible] = useState(false);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 // 定义API响应结构
 interface ApiResponse<T> {

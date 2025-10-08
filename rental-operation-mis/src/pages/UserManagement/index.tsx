@@ -60,7 +60,7 @@ const UserManagement: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      render: (_, record) => (
+      render: () => (
         <Space size="middle">
           <a>查看详情</a>
           <a>禁用</a>

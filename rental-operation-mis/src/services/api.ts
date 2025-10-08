@@ -1,3 +1,68 @@
+// API服务基础配置
+const API_BASE_URL = '/api'
+
+// 通用请求函数
+export const request = async (url: string, options: RequestInit = {}) => {
+  const token = localStorage.getItem('token')
+  
+  const config: RequestInit = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+      ...options.headers,
+    },
+    ...options,
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}${url}`, config)
+    
+    if (!response.ok) {
+      if (response.status === 401) {
+        // Token 过期或无效，跳转到登录页
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+        throw new Error('身份验证失效，请重新登录')
+      }
+      
+      // 尝试解析错误响应
+      let errorMsg = `请求失败: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        if (errorData.message) {
+          errorMsg = errorData.message;
+        }
+      } catch (e) {
+        // 解析失败，使用默认错误信息
+      }
+      
+      throw new Error(errorMsg);
+    }
+    
+    const data = await response.json();
+    
+    // 检查业务响应是否成功
+    if (data && data.code !== 200) {
+      throw new Error(data.message || '业务处理失败');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('API request failed:', error);
+    throw error;
+  }
+}
+
+// 运营认证API
+export const operationAuthAPI = {
+  // 用户登录
+  login: (credentials: { username: string; password: string }) => 
+    request('/operation/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    }),
+}
+
 // 商户审核API
 export const merchantAuditAPI = {
   // 获取待审核商户列表
@@ -13,8 +78,7 @@ export const merchantAuditAPI = {
     }
     
     const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
-    const response = await apiClient.get<ApiResponse<PageResponse<any>>>(`/operation/merchants/pending${queryString ? '?' + queryString : ''}`);
-    return response;
+    return request(`/operation/merchants/pending${queryString ? '?' + queryString : ''}`);
   },
   
   // 获取所有商户列表
@@ -30,8 +94,7 @@ export const merchantAuditAPI = {
     }
     
     const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
-    const response = await apiClient.get<ApiResponse<PageResponse<any>>>(`/operation/merchants${queryString ? '?' + queryString : ''}`);
-    return response;
+    return request(`/operation/merchants${queryString ? '?' + queryString : ''}`);
   },
   
   // 审核商户申请
@@ -42,14 +105,14 @@ export const merchantAuditAPI = {
     if (data.reason) {
       params.append('reason', data.reason);
     }
-    const response = await apiClient.put<ApiResponse<any>>(`/operation/merchants/${id}/audit?${params.toString()}`);
-    return response;
+    return request(`/operation/merchants/${id}/audit?${params.toString()}`, {
+      method: 'PUT'
+    });
   },
   
   // 获取商户申请详情
   getMerchantDetail: async (id: string) => {
-    const response = await apiClient.get<ApiResponse<any>>(`/operation/merchants/${id}`);
-    return response;
+    return request(`/operation/merchants/${id}`);
   }
 };
 
@@ -68,8 +131,7 @@ export const vehicleAuditAPI = {
     }
     
     const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
-    const response = await apiClient.get<ApiResponse<PageResponse<any>>>(`/operation/vehicles/pending${queryString ? '?' + queryString : ''}`);
-    return response;
+    return request(`/operation/vehicles/pending${queryString ? '?' + queryString : ''}`);
   },
   
   // 获取所有车辆列表
@@ -85,8 +147,7 @@ export const vehicleAuditAPI = {
     }
     
     const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
-    const response = await apiClient.get<ApiResponse<PageResponse<any>>>(`/operation/vehicles${queryString ? '?' + queryString : ''}`);
-    return response;
+    return request(`/operation/vehicles${queryString ? '?' + queryString : ''}`);
   },
   
   // 审核车辆
@@ -97,14 +158,14 @@ export const vehicleAuditAPI = {
     if (data.reason) {
       params.append('reason', data.reason);
     }
-    const response = await apiClient.put<ApiResponse<any>>(`/operation/vehicles/${id}/audit?${params.toString()}`);
-    return response;
+    return request(`/operation/vehicles/${id}/audit?${params.toString()}`, {
+      method: 'PUT'
+    });
   },
   
   // 获取车辆详情
   getVehicleDetail: async (id: string) => {
-    const response = await apiClient.get<ApiResponse<any>>(`/operation/vehicles/${id}`);
-    return response;
+    return request(`/operation/vehicles/${id}`);
   }
 };
 
@@ -123,8 +184,7 @@ export const storeAuditAPI = {
     }
     
     const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
-    const response = await apiClient.get<ApiResponse<PageResponse<any>>>(`/operation/stores/pending${queryString ? '?' + queryString : ''}`);
-    return response;
+    return request(`/operation/stores/pending${queryString ? '?' + queryString : ''}`);
   },
   
   // 获取所有门店列表
@@ -140,8 +200,7 @@ export const storeAuditAPI = {
     }
     
     const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
-    const response = await apiClient.get<ApiResponse<PageResponse<any>>>(`/operation/stores${queryString ? '?' + queryString : ''}`);
-    return response;
+    return request(`/operation/stores${queryString ? '?' + queryString : ''}`);
   },
   
   // 审核门店
@@ -152,14 +211,14 @@ export const storeAuditAPI = {
     if (data.reason) {
       params.append('reason', data.reason);
     }
-    const response = await apiClient.put<ApiResponse<any>>(`/operation/stores/${id}/audit?${params.toString()}`);
-    return response;
+    return request(`/operation/stores/${id}/audit?${params.toString()}`, {
+      method: 'PUT'
+    });
   },
   
   // 获取门店详情
   getStoreDetail: async (id: string) => {
-    const response = await apiClient.get<ApiResponse<any>>(`/operation/stores/${id}`);
-    return response;
+    return request(`/operation/stores/${id}`);
   }
 };
 
@@ -167,20 +226,17 @@ export const storeAuditAPI = {
 export const operationDashboardAPI = {
   // 获取运营概览数据
   getOverviewStats: async () => {
-    const response = await apiClient.get<ApiResponse<any>>('/operation/dashboard/overview');
-    return response;
+    return request('/operation/dashboard/overview');
   },
   
   // 获取审核统计数据
   getAuditStats: async () => {
-    const response = await apiClient.get<ApiResponse<any>>('/operation/dashboard/audit-stats');
-    return response;
+    return request('/operation/dashboard/audit-stats');
   },
   
   // 获取业务趋势数据
   getTrendData: async (type: string, period: string) => {
-    const response = await apiClient.get<ApiResponse<any>>(`/operation/dashboard/trends?type=${type}&period=${period}`);
-    return response;
+    return request(`/operation/dashboard/trends?type=${type}&period=${period}`);
   }
 };
 
@@ -188,26 +244,30 @@ export const operationDashboardAPI = {
 export const carModelAPI = {
   // 创建车型
   createCarModel: async (data: any) => {
-    const response = await apiClient.post<ApiResponse<number>>('/operation/car-models', data);
-    return response;
+    return request('/operation/car-models', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   },
   
   // 更新车型
   updateCarModel: async (id: number, data: any) => {
-    const response = await apiClient.put<ApiResponse<void>>(`/operation/car-models/${id}`, data);
-    return response;
+    return request(`/operation/car-models/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
   },
   
   // 删除车型
   deleteCarModel: async (id: number) => {
-    const response = await apiClient.delete<ApiResponse<void>>(`/operation/car-models/${id}`);
-    return response;
+    return request(`/operation/car-models/${id}`, {
+      method: 'DELETE',
+    });
   },
   
   // 获取车型详情
   getCarModel: async (id: number) => {
-    const response = await apiClient.get<ApiResponse<any>>(`/operation/car-models/${id}`);
-    return response;
+    return request(`/operation/car-models/${id}`);
   },
   
   // 分页查询车型列表
@@ -223,19 +283,16 @@ export const carModelAPI = {
     }
     
     const queryString = Object.keys(filteredParams).length > 0 ? new URLSearchParams(filteredParams).toString() : '';
-    const response = await apiClient.get<ApiResponse<PageResponse<any>>>(`/operation/car-models${queryString ? '?' + queryString : ''}`);
-    return response;
+    return request(`/operation/car-models${queryString ? '?' + queryString : ''}`);
   },
   
   // 查询全部车型
   getAllCarModels: async () => {
-    const response = await apiClient.get<ApiResponse<any[]>>('/operation/car-models/all');
-    return response;
+    return request('/operation/car-models/all');
   },
   
   // 按品牌查询车型
   getCarModelsByBrand: async (brand: string) => {
-    const response = await apiClient.get<ApiResponse<any[]>>(`/operation/car-models/brand/${brand}`);
-    return response;
+    return request(`/operation/car-models/brand/${brand}`);
   }
 };

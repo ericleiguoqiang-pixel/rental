@@ -22,7 +22,6 @@ import {
   CheckOutlined,
   CloseOutlined,
   SearchOutlined,
-  CarOutlined,
   AuditOutlined
 } from '@ant-design/icons';
 import MainLayout from '../../components/MainLayout';
@@ -71,7 +70,7 @@ interface VehicleApplication {
 }
 
 const VehicleAudit: React.FC = () => {
-  const { loading, data: vehicles, pagination, execute, reset } = usePaginationApi<VehicleApplication>();
+  const { loading, data: vehicles, pagination, execute } = usePaginationApi<VehicleApplication>();
   const [selectedVehicle, setSelectedVehicle] = useState<VehicleApplication | null>(null);
   const [detailVisible, setDetailVisible] = useState(false);
   const [auditVisible, setAuditVisible] = useState(false);

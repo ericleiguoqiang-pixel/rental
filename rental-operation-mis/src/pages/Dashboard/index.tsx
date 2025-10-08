@@ -15,7 +15,7 @@ const { Title } = Typography;
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState({
+  const [stats] = useState({
     pendingMerchants: 12,
     pendingVehicles: 25,
     pendingStores: 8,

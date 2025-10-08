@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Card, Typography, message, Space } from 'antd';
 import { UserOutlined, LockOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { operationAuthAPI, ApiResponse } from '../../services/api';
+import { operationAuthAPI } from '../../services/api';
 import { useAuthStore } from '../../hooks/useAuth';
 
 const { Title, Text } = Typography;
