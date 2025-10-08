@@ -91,7 +91,7 @@ const Home: React.FC = () => {
         <Col>
           {userInfo && (
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <span style={{ marginRight: 10 }}>欢迎，{userInfo.employeeName}</span>
+              <span style={{ marginRight: 10 }}>欢迎，{userInfo.nickname || userInfo.employeeName || '用户'}</span>
               <UserInfo />
             </div>
           )}

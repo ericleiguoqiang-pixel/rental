@@ -5,9 +5,8 @@ export const login = async (phone: string, code: string, captchaKey: string) => 
   try {
     const response = await request.post('/user/login', { 
       phone, 
-      code,
-      captcha: code,
-      captchaKey
+      code
+      // 移除了captcha和captchaKey字段，因为不再使用图片验证码
     });
     return response.data;
   } catch (error: any) {
@@ -62,21 +61,6 @@ export const logout = async () => {
     return { 
       success: true, // 仍然认为登出成功
       message: error.response?.data?.message || '登出时发生错误'
-    };
-  }
-};
-
-// 获取验证码
-export const getCaptcha = async () => {
-  try {
-    const response = await request.get('/auth/captcha');
-    return response.data;
-  } catch (error: any) {
-    console.error('Get captcha error:', error);
-    return { 
-      success: false, 
-      message: error.response?.data?.message || '获取验证码失败',
-      code: error.response?.data?.code || 500
     };
   }
 };

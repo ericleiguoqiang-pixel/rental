@@ -1,41 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Input, message, Form, Card, Typography, Row, Col } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { login, getCaptcha } from '../services/authService';
+import { login } from '../services/authService';
 
 const { Title } = Typography;
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const [captchaKey, setCaptchaKey] = useState('');
-  const [captchaText, setCaptchaText] = useState('');
+  const [countdown, setCountdown] = useState(0);
+  const [isSending, setIsSending] = useState(false);
   const navigate = useNavigate();
 
-  // 获取验证码
-  const fetchCaptcha = async () => {
+  // 发送验证码
+  const sendVerificationCode = async () => {
+    if (countdown > 0) return;
+    
+    setIsSending(true);
     try {
-      const result = await getCaptcha();
-      if (result.success) {
-        const [key, text] = result.data.split(':');
-        setCaptchaKey(key);
-        setCaptchaText(text);
-        message.success('验证码已更新');
-      } else {
-        message.error(result.message || '获取验证码失败');
-      }
+      // 这里是假的发送验证码逻辑，实际项目中会调用后端接口
+      // 模拟发送验证码的网络请求延迟
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 设置倒计时
+      setCountdown(60);
+      message.success('验证码已发送，请输入1111进行登录');
     } catch (error) {
-      message.error('获取验证码失败');
+      message.error('发送验证码失败，请稍后重试');
+    } finally {
+      setIsSending(false);
     }
   };
 
+  // 倒计时效果
   useEffect(() => {
-    fetchCaptcha();
-  }, []);
+    let timer: NodeJS.Timeout;
+    if (countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [countdown]);
 
   const onFinish = async (values: { phone: string; code: string }) => {
     setLoading(true);
     try {
-      const result = await login(values.phone, values.code, captchaKey);
+      // 注意：这里去掉了captchaKey参数，因为不再需要图片验证码
+      const result = await login(values.phone, values.code, '');
       if (result.success) {
         message.success('登录成功');
         // 存储认证信息
@@ -46,13 +57,9 @@ const Login: React.FC = () => {
         navigate('/');
       } else {
         message.error(result.message || '登录失败');
-        // 刷新验证码
-        fetchCaptcha();
       }
     } catch (error) {
       message.error('登录失败，请稍后重试');
-      // 刷新验证码
-      fetchCaptcha();
     } finally {
       setLoading(false);
     }
@@ -89,11 +96,15 @@ const Login: React.FC = () => {
           >
             <Row gutter={8}>
               <Col span={16}>
-                <Input placeholder="请输入验证码" />
+                <Input placeholder="请输入验证码(测试阶段请输入1111)" />
               </Col>
               <Col span={8}>
-                <Button onClick={fetchCaptcha}>
-                  {captchaText || '获取验证码'}
+                <Button 
+                  onClick={sendVerificationCode} 
+                  disabled={countdown > 0 || isSending}
+                  loading={isSending}
+                >
+                  {countdown > 0 ? `${countdown}秒后重发` : '发送验证码'}
                 </Button>
               </Col>
             </Row>
@@ -105,6 +116,9 @@ const Login: React.FC = () => {
             </Button>
           </Form.Item>
         </Form>
+        <div style={{ textAlign: 'center', marginTop: 16, fontSize: 12, color: '#999' }}>
+          测试阶段验证码统一使用1111
+        </div>
       </Card>
     </div>
   );
