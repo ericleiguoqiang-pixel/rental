@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+langchain==0.3.27
+langchain-community==0.3.27
+langchain-core==0.3.76
+langchain-mcp-adapters==0.1.10
+langchain-deepseek
+python-dotenv==1.0.0
+requests
+pydantic

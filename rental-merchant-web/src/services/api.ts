@@ -1,5 +1,6 @@
 // API服务基础配置
 const API_BASE_URL = '/api'
+const AI_BASE_URL = '/ai'
 
 // 通用请求函数
 export const request = async (url: string, options: RequestInit = {}) => {
@@ -63,6 +64,67 @@ export const request = async (url: string, options: RequestInit = {}) => {
     return data;
   } catch (error) {
     console.error('API request failed:', error);
+    throw error;
+  }
+}
+
+// AI服务专用请求函数
+export const aiRequest = async (url: string, options: RequestInit = {}) => {
+  const token = localStorage.getItem('token')
+  // 从用户信息中获取租户ID
+  let tenantId = '1'; // 默认值
+  try {
+    const userInfoStr = localStorage.getItem('userInfo');
+    if (userInfoStr) {
+      const userInfo = JSON.parse(userInfoStr);
+      if (userInfo.tenantId) {
+        tenantId = userInfo.tenantId.toString();
+      }
+    }
+  } catch (e) {
+    console.warn('解析用户信息失败:', e);
+  }
+  
+  const config: RequestInit = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+      'X-Tenant-Id': tenantId,
+      ...options.headers,
+    },
+    ...options,
+  }
+
+  try {
+    const response = await fetch(`${AI_BASE_URL}${url}`, config)
+    
+    if (!response.ok) {
+      if (response.status === 401) {
+        // Token 过期或无效，跳转到登录页
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+        throw new Error('身份验证失效，请重新登录')
+      }
+      
+      // 尝试解析错误响应
+      let errorMsg = `请求失败: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        if (errorData.message) {
+          errorMsg = errorData.message;
+        }
+      } catch (e) {
+        // 解析失败，使用默认错误信息
+      }
+      
+      throw new Error(errorMsg);
+    }
+    
+    // AI服务直接返回响应数据，不需要检查code字段
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('AI API request failed:', error);
     throw error;
   }
 }
@@ -542,4 +604,14 @@ export const employeeAPI = {
   resetPassword: (id: number) => request(`/employees/${id}/reset-password`, {
     method: 'PUT',
   }),
+}
+
+// AI服务API
+export const aiAPI = {
+  // 发送聊天消息
+  chat: (data: { messages: Array<{ role: string; content: string }>; tenant_id: number }) => 
+    aiRequest('/chat', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 }

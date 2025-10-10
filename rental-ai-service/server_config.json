@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "basedata": {
+      "url": "http://localhost:8088/mcp/sse",
+      "transport": "sse"
+    }
+  }
+}

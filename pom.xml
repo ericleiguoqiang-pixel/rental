@@ -23,6 +23,7 @@
         <module>rental-api</module>
         <module>rental-pricing</module>
         <module>rental-mcp-gateway</module>
+        <module>rental-ai-service</module>
     </modules>
 
     <properties>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Avatar, Dropdown, Button, Typography } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, Button, Typography, Badge } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   DashboardOutlined,
@@ -16,8 +16,11 @@ import {
   FileDoneOutlined,
   DollarOutlined,
   TeamOutlined,
+  RobotOutlined,
+  MessageOutlined
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
+import AIChatModal from '../AIChatModal';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
@@ -31,6 +34,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '仪表盘' }
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const [aiChatVisible, setAiChatVisible] = useState(false);
 
   // 根据当前路径设置选中的菜单项
   const getSelectedKeys = () => {
@@ -193,19 +197,36 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '仪表盘' }
             </Title>
           </div>
           
-          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              cursor: 'pointer',
-              padding: '8px 12px',
-              borderRadius: 6,
-              transition: 'background-color 0.3s'
-            }}>
-              <Avatar size="small" icon={<UserOutlined />} />
-              <span style={{ marginLeft: 8 }}>管理员</span>
-            </div>
-          </Dropdown>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <Badge count={0} dot>
+              <Button 
+                type="text" 
+                icon={<MessageOutlined />} 
+                style={{ fontSize: '18px' }}
+              />
+            </Badge>
+            <Button 
+              type="primary" 
+              icon={<RobotOutlined />}
+              onClick={() => setAiChatVisible(true)}
+            >
+              AI对话
+            </Button>
+            
+            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                cursor: 'pointer',
+                padding: '8px 12px',
+                borderRadius: 6,
+                transition: 'background-color 0.3s'
+              }}>
+                <Avatar size="small" icon={<UserOutlined />} />
+                <span style={{ marginLeft: 8 }}>管理员</span>
+              </div>
+            </Dropdown>
+          </div>
         </Header>
         
         <Content style={{ 
@@ -219,6 +240,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, title = '仪表盘' }
           {children}
         </Content>
       </Layout>
+      
+      <AIChatModal 
+        visible={aiChatVisible} 
+        onClose={() => setAiChatVisible(false)} 
+      />
     </Layout>
   );
 };

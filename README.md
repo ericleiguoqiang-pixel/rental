@@ -8,8 +8,8 @@
 - 已完成SaaS端、Mis端和前端h5的基本功能，还有很多功能不够完善，有些数据也是假数据，持续完善中
 - 项目中的代码90%都是AI生成的，我使用阿里的Qoder做为编程工具
 - 主要代码都是我在十一放假期间完成的
-- 后续计划在项目中添加AI相关功能，包括商户可以通过自然语言完成功能设置，运营可以通过自然语言完成审等
-- 也可以提供AI的数据分析、行业动态、竞品比对等
+- 当前已经将门店管理和车辆管理相关操作封装为MCP工具，在商户端增加了AI入口可以通过聊天方式做对应操作
+- 后续可以提供AI的数据分析、行业动态、竞品比对等
 
 ## 在线体验
 - SaaS端：http://43.143.163.102:8001/ ，账号：13511112223，密码：123456
@@ -23,6 +23,7 @@
 ```
 ├── rental-gateway          # API网关服务 (认证鉴权、限流熔断)
 ├── rental-mcp-gateway      # MCP-API网关服务
+├── rental-ai-service       # AI对话服务 (Langchain + DeepSeek)
 ├── rental-user-service      # 用户服务 (商户入驻、员工管理、权限控制)
 ├── rental-base-data-service # 基础数据服务 (门店管理、车型库、车辆管理)
 ├── rental-product-service   # 商品服务 (车型商品、定价策略、增值服务)
@@ -41,7 +42,7 @@
 | UI组件库       | Ant Design           | 5.2.0    |
 | 后端框架        | Spring Boot          | 3.0.12   |
 | Java AI框架   | Spring AI            | 1.0.1    |
-| Python AI框架 | Langchain            | 3.0.0      |
+| Python AI框架 | Langchain            | 0.3.27   |
 | 微服务治理       | Spring Cloud Alibaba | 2022.0.4 |
 | 注册中心        | Nacos                | -        |
 | 配置中心        | Nacos                | -        |
@@ -54,6 +55,35 @@
 
 系统使用高德地图API实现电子围栏绘制功能，请参考 [高德地图集成指南](docs/AMAP_INTEGRATION.md) 进行配置。
 
+## AI对话模块
+
+### 功能特性
+- 自然语言交互：商户可以通过对话方式管理门店和车辆
+- 智能助手：基于DeepSeek大语言模型提供智能回复
+- 安全操作：新增、修改、删除类操作需要二次确认
+- 工具集成：与MCP网关集成，调用后端服务
+- 使用langchain_mcp_adapters库完成MCP功能集成
+
+### 技术实现
+- 后端：Python + Langchain 0.3.27 + FastAPI
+- 前端：React + Ant Design
+- 大模型：DeepSeek
+- 通信协议：RESTful API
+
+### 目录结构
+```
+rental/
+└── rental-ai-service/      # AI对话服务
+    ├── src/                # 源代码目录
+    │   ├── main.py         # 服务入口
+    │   ├── agent.py        # AI代理逻辑
+    │   ├── mcp_adapter.py  # MCP适配器
+    │   └── mcp_client.py   # MCP客户端
+    ├── requirements.txt    # Python依赖
+    ├── Dockerfile         # Docker配置
+    └── README.md          # 服务说明
+```
+
 ## 快速开始
 
 ### 环境要求
@@ -61,6 +91,7 @@
 - JDK 21+
 - Maven 3.6+
 - Node.js 16+
+- Python 3.11+
 - MySQL 8.0+
 - Redis 6.0+
 - Nacos 2.0+
@@ -78,6 +109,7 @@ rental/
 ├── rental-api/            # API模块
 ├── rental-gateway/        # API网关
 ├── rental-mcp-gateway/    # MCP-API网关
+├── rental-ai-service/     # AI对话服务
 ├── rental-user-service/   # 用户服务
 ├── rental-base-data-service/ # 基础数据服务
 ├── rental-product-service/   # 商品服务
@@ -121,6 +153,12 @@ cd rental-base-data-service && mvn spring-boot:run
 cd rental-product-service && mvn spring-boot:run
 cd rental-order-service && mvn spring-boot:run
 cd rental-payment-service && mvn spring-boot:run
+cd rental-mcp-gateway && mvn spring-boot:run
+
+# 启动AI服务
+cd rental-ai-service
+pip install -r requirements.txt
+python src/main.py
 ```
 
 6. **启动前端**
@@ -134,6 +172,8 @@ npm run dev
 
 - 商户端前端: http://localhost:3000
 - API网关: http://localhost:8090
+- MCP网关: http://localhost:8088
+- AI服务: http://localhost:8280 (通过商户前端代理访问: /ai/chat)
 - Nacos控制台: http://localhost:8848/nacos
 
 ## 核心功能

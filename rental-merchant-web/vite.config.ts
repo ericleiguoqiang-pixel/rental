@@ -18,6 +18,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      '/ai': {
+        target: 'http://localhost:8280',
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
   build: {
