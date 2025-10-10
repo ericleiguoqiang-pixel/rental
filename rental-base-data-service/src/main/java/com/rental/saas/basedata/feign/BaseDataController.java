@@ -12,6 +12,7 @@ import com.rental.saas.basedata.service.ServiceAreaService;
 import com.rental.saas.basedata.service.StoreService;
 import com.rental.saas.basedata.service.VehicleService;
 import com.rental.saas.common.response.ApiResponse;
+import com.rental.saas.common.response.PageResponse;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +26,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-public class BaseDataController implements BaseDataClient {
+public class BaseDataController{
 
     @Autowired
     private VehicleService vehicleService;
@@ -39,21 +40,18 @@ public class BaseDataController implements BaseDataClient {
     @Autowired
     private ServiceAreaService serviceAreaService;
 
-    @Override
     @GetMapping("/api/feign/vehicles/store/{storeId}")
     public ApiResponse<List<VehicleResponse>> getVehiclesByStore(@PathVariable("storeId") Long storeId) {
         List<VehicleResponse> vehicles = vehicleService.getVehiclesByStore(storeId, null);
         return ApiResponse.success("查询成功", vehicles);
     }
 
-    @Override
     @GetMapping("/api/feign/car-models/batch/{ids}")
     public ApiResponse<List<CarModelResponse>> getCarModelsByIds(@PathVariable("ids") String ids) {
         List<CarModelResponse> carModels = carModelService.getCarModelsByIds(ids);
         return ApiResponse.success("查询成功", carModels);
     }
     
-    @Override
     @GetMapping("/api/feign/stores/nearby")
     public ApiResponse<List<StoreResponse>> getNearbyStores(
             @RequestParam("longitude") Double longitude,
@@ -65,7 +63,6 @@ public class BaseDataController implements BaseDataClient {
         return ApiResponse.success("查询成功", stores);
     }
     
-    @Override
     @GetMapping("/api/feign/stores/{id}")
     public ApiResponse<StoreResponse> getStoreById(@PathVariable("id") Long id) {
         Store store = storeService.getById(id);
@@ -90,7 +87,6 @@ public class BaseDataController implements BaseDataClient {
         return ApiResponse.success("查询成功", response);
     }
     
-    @Override
     @GetMapping("/api/feign/service-areas/store/{storeId}")
     public ApiResponse<List<ServiceAreaResponse>> getServiceAreasByStore(@PathVariable("storeId") Long storeId) {
         List<ServiceArea> serviceAreas = serviceAreaService.listByStoreId(storeId, null);
@@ -114,38 +110,34 @@ public class BaseDataController implements BaseDataClient {
         return ApiResponse.success("查询成功", areaResponses);
     }
     
-    @Override
     @GetMapping("/api/feign/vehicles/count/status")
     public ApiResponse<Map<String, Integer>> countVehiclesByStatus(@RequestHeader("X-Tenant-Id") Long tenantId) {
         Map<String, Integer> vehicleCount = vehicleService.countVehiclesByStatus(tenantId);
         return ApiResponse.success(vehicleCount);
     }
     
-    @Override
     @GetMapping("/api/feign/vehicles/count/pending")
     public ApiResponse<Integer> countPendingVehicles() {
         int count = vehicleService.countPendingVehicles();
         return ApiResponse.success(count);
     }
     
-    @Override
     @GetMapping("/api/feign/stores/count/pending")
     public ApiResponse<Integer> countPendingStores() {
         int count = storeService.countPendingStores();
         return ApiResponse.success(count);
     }
     
-    @Override
     @GetMapping("/api/feign/operation/vehicles/count/status")
     public ApiResponse<Map<String, Integer>> countVehiclesByAuditStatus() {
         Map<String, Integer> vehicleCount = vehicleService.countVehiclesByAuditStatus();
         return ApiResponse.success(vehicleCount);
     }
     
-    @Override
     @GetMapping("/api/feign/operation/stores/count/status")
     public ApiResponse<Map<String, Integer>> countStoresByAuditStatus() {
         Map<String, Integer> storeCount = storeService.countStoresByAuditStatus();
         return ApiResponse.success(storeCount);
     }
+
 }

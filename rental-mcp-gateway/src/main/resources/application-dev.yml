@@ -1,0 +1,40 @@
+spring:
+  config:
+    import:
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.yml
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 43.143.163.102:8848
+        namespace: develop
+#        group: DEFAULT_GROUP
+      config:
+        server-addr: 43.143.163.102:8848
+        namespace: develop
+#        group: DEFAULT_GROUP
+#        file-extension: yml
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins: "http://localhost:3000"
+            allowed-origin-patterns: "http://localhost:*"
+            allowed-methods: "*"
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600
+
+# JWT配置
+app:
+  jwt:
+    secret: rental-saas-jwt-secret-key-2024-dev
+    access-token-expiration: 7200000  # 2小时
+    refresh-token-expiration: 2592000000  # 30天
+
+# 日志配置
+logging:
+  level:
+    com.rental.saas: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.ai: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId}] %logger{50} - %msg%n"

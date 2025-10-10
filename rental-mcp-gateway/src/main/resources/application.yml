@@ -1,0 +1,40 @@
+server:
+  port: 8088
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: rental-mcp-gateway
+  ai:
+    mcp:
+      server:
+        enabled: true
+        version: 1.0.0
+        type: SYNC
+        sse-endpoint: /mcp/sse
+
+logging:
+  level:
+    com.rental.saas: info
+    org.springframework.ai: debug
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+
+
+# 监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# Swagger配置
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
