@@ -22,6 +22,7 @@
 
 ```
 ├── rental-gateway          # API网关服务 (认证鉴权、限流熔断)
+├── rental-mcp-gateway      # MCP-API网关服务
 ├── rental-user-service      # 用户服务 (商户入驻、员工管理、权限控制)
 ├── rental-base-data-service # 基础数据服务 (门店管理、车型库、车辆管理)
 ├── rental-product-service   # 商品服务 (车型商品、定价策略、增值服务)
@@ -34,18 +35,20 @@
 
 ### 技术栈
 
-| 层级 | 技术选型 | 版本         |
-|------|----------|------------|
-| 前端框架 | React | 18.2.0     |
-| UI组件库 | Ant Design | 5.2.0      |
-| 后端框架 | Spring Boot | 3.0.12     |
-| 微服务治理 | Spring Cloud Alibaba | 2022.0.4 |
-| 注册中心 | Nacos | -          |
-| 配置中心 | Nacos | -          |
-| 网关 | Spring Cloud Gateway | -          |
-| 缓存 | Redis | -          |
-| 数据库 | MySQL | 8.0        |
-| 消息队列 | RocketMQ | -          |
+| 层级          | 技术选型                 | 版本       |
+|-------------|----------------------|----------|
+| 前端框架        | React                | 18.2.0   |
+| UI组件库       | Ant Design           | 5.2.0    |
+| 后端框架        | Spring Boot          | 3.0.12   |
+| Java AI框架   | Spring AI            | 1.0.1    |
+| Python AI框架 | Langchain            | 3.0.0      |
+| 微服务治理       | Spring Cloud Alibaba | 2022.0.4 |
+| 注册中心        | Nacos                | -        |
+| 配置中心        | Nacos                | -        |
+| 网关          | Spring Cloud Gateway | -        |
+| 缓存          | Redis                | -        |
+| 数据库         | MySQL                | 8.0      |
+| 消息队列        | RocketMQ             | -        |
 
 ## 高德地图集成
 
@@ -74,6 +77,7 @@ rental/
 ├── rental-common/         # 公共模块
 ├── rental-api/            # API模块
 ├── rental-gateway/        # API网关
+├── rental-mcp-gateway/    # MCP-API网关
 ├── rental-user-service/   # 用户服务
 ├── rental-base-data-service/ # 基础数据服务
 ├── rental-product-service/   # 商品服务
