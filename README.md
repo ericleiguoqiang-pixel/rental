@@ -8,8 +8,8 @@
 - 已完成SaaS端、Mis端和前端h5的基本功能，还有很多功能不够完善，有些数据也是假数据，持续完善中
 - 项目中的代码90%都是AI生成的，我使用阿里的Qoder做为编程工具
 - 主要代码都是我在十一放假期间完成的
-- 当前已经将门店管理和车辆管理相关操作封装为MCP工具，在商户端增加了AI入口可以通过聊天方式做对应操作
-- 后续可以提供AI的数据分析、行业动态、竞品比对等
+- 后续计划在项目中添加AI相关功能，包括商户可以通过自然语言完成功能设置，运营可以通过自然语言完成审等
+- 也可以提供AI的数据分析、行业动态、竞品比对等
 
 ## 在线体验
 - SaaS端：http://43.143.163.102:8001/ ，账号：13511112223，密码：123456
@@ -22,8 +22,8 @@
 
 ```
 ├── rental-gateway          # API网关服务 (认证鉴权、限流熔断)
-├── rental-mcp-gateway      # MCP-API网关服务
-├── rental-ai-service       # AI对话服务 (Langchain + DeepSeek)
+├── rental-mcp-gateway      # MCP-API网关服务 (部署在122.51.43.52)
+├── rental-ai-service       # AI对话服务 (Langchain + DeepSeek，部署在122.51.43.52)
 ├── rental-user-service      # 用户服务 (商户入驻、员工管理、权限控制)
 ├── rental-base-data-service # 基础数据服务 (门店管理、车型库、车辆管理)
 ├── rental-product-service   # 商品服务 (车型商品、定价策略、增值服务)
@@ -108,8 +108,8 @@ rental/
 ├── rental-common/         # 公共模块
 ├── rental-api/            # API模块
 ├── rental-gateway/        # API网关
-├── rental-mcp-gateway/    # MCP-API网关
-├── rental-ai-service/     # AI对话服务
+├── rental-mcp-gateway/    # MCP-API网关 (部署在专用服务器)
+├── rental-ai-service/     # AI对话服务 (部署在专用服务器)
 ├── rental-user-service/   # 用户服务
 ├── rental-base-data-service/ # 基础数据服务
 ├── rental-product-service/   # 商品服务
@@ -168,12 +168,29 @@ npm install
 npm run dev
 ```
 
+### 部署说明
+
+项目使用[deploy.sh](file:///Users/leiguoqiang/javaproj/rental/scripts/deploy.sh)脚本进行部署：
+
+```bash
+# 部署单个模块
+./scripts/deploy.sh rental-user-service
+
+# 部署所有模块
+./scripts/deploy.sh all
+```
+
+注意：
+- `rental-mcp-gateway`和`rental-ai-service`部署在专用服务器(122.51.43.52)
+- 其他后端服务部署在主服务器(43.143.163.102)
+- 前端项目部署在主服务器的Web目录下
+
 ### 访问地址
 
 - 商户端前端: http://localhost:3000
 - API网关: http://localhost:8090
-- MCP网关: http://localhost:8088
-- AI服务: http://localhost:8280 (通过商户前端代理访问: /ai/chat)
+- MCP网关: http://122.51.43.52:8088
+- AI服务: http://122.51.43.52:8280 (通过商户前端代理访问: /ai/chat)
 - Nacos控制台: http://localhost:8848/nacos
 
 ## 核心功能

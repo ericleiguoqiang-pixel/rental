@@ -12,6 +12,7 @@ SSH_PORT="22"
 SSH_USER="root"
 SSH_KEY="/Users/leiguoqiang/.ssh/43.143.163.102.key"
 BACKEND_TARGET_DIR="/www/server/java_project"
+PYTHON_TARGET_DIR="/www/server/python_project/rental-ai-service"
 FRONTEND_TARGET_DIR="/www/wwwroot"
 
 # 检查参数
@@ -47,7 +48,7 @@ if [ "$MODULE_NAME" == "all" ]; then
     cd ..
     
     # 编译所有后端服务模块
-    BACKEND_MODULES=("rental-gateway" "rental-user-service" "rental-base-data-service" "rental-product-service" "rental-order-service" "rental-payment-service" "rental-pricing")
+    BACKEND_MODULES=("rental-gateway" "rental-user-service" "rental-base-data-service" "rental-product-service" "rental-order-service" "rental-payment-service" "rental-pricing" "rental-mcp-gateway")
     for module in "${BACKEND_MODULES[@]}"; do
         if [ -d "$module" ]; then
             echo "开始构建后端模块: $module"
@@ -97,6 +98,39 @@ if [ "$MODULE_NAME" == "all" ]; then
         fi
     done
     
+
+        
+    # 部署AI服务
+    echo "开始部署AI服务: rental-ai-service"
+    if [ -d "rental-ai-service" ]; then
+        cd rental-ai-service
+
+        # 传输AI服务文件到专用服务器
+        echo "传输AI服务文件到专用服务器..."
+        scp -i "$SSH_KEY" -P "$SSH_PORT" *.py *.json requirements.txt start.sh "$SSH_USER@$SERVER_IP:$PYTHON_TARGET_DIR/"
+        # rsync -avz -e "ssh -i $SSH_KEY -p $SSH_PORT" --exclude '__pycache__/' --exclude '*.pyc' ./ "$SSH_USER@$SERVER_IP:/root/rental/rental-ai-service/"
+
+        if [ $? -ne 0 ]; then
+            echo "AI服务文件传输失败"
+            exit 1
+        fi
+
+        # 在远程服务器上安装依赖并重启服务
+        echo "在远程服务器上安装依赖并重启AI服务..."
+        ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SERVER_IP" \
+            "cd $PYTHON_TARGET_DIR && chmod +x start.sh && ./start.sh restart"
+
+        if [ $? -ne 0 ]; then
+            echo "AI服务部署失败"
+            exit 1
+        fi
+
+        echo "AI服务部署完成"
+        cd ..
+    else
+        echo "警告: AI服务目录不存在，跳过部署"
+    fi
+
     # 构建所有前端项目
     FRONTEND_MODULES=("rental-user-web" "rental-merchant-web" "rental-operation-mis")
     for module in "${FRONTEND_MODULES[@]}"; do
@@ -148,6 +182,9 @@ fi
 if [[ "$MODULE_NAME" == *"-web" ]] || [[ "$MODULE_NAME" == *"-mis" ]]; then
     PROJECT_TYPE="frontend"
     echo "识别为前端项目"
+elif [[ "$MODULE_NAME" == "rental-ai-service" ]]; then
+    PROJECT_TYPE="ai"
+    echo "识别为AI服务项目"
 else
     PROJECT_TYPE="backend"
     echo "识别为后端项目"
@@ -189,6 +226,12 @@ elif [ "$PROJECT_TYPE" == "frontend" ]; then
     fi
     
     echo "前端项目构建完成"
+    cd ..
+elif [ "$PROJECT_TYPE" == "ai" ]; then
+    echo "开始构建AI服务..."
+    cd "$MODULE_NAME"
+    
+    echo "AI构建完成"
     cd ..
 fi
 
@@ -232,6 +275,30 @@ elif [ "$PROJECT_TYPE" == "frontend" ]; then
     
     # 重启前端服务（如果需要）
     echo "前端项目部署完成，可能需要重启Web服务器"
+elif [ "$PROJECT_TYPE" == "ai" ]; then
+    # 传输AI服务文件到专用服务器
+    echo "传输AI服务文件到专用服务器..."
+    #rsync -avz -e "ssh -i $SSH_KEY -p $SSH_PORT" --exclude '__pycache__/' --exclude '*.pyc' ./ "$SSH_USER@$SERVER_IP:/root/rental/rental-ai-service/"
+    scp -i "$SSH_KEY" -P "$SSH_PORT" $MODULE_NAME/*.py $MODULE_NAME/*.json $MODULE_NAME/requirements.txt $MODULE_NAME/.env $MODULE_NAME/start.sh "$SSH_USER@$SERVER_IP:$PYTHON_TARGET_DIR/"
+
+    if [ $? -ne 0 ]; then
+        echo "AI服务文件传输失败"
+        exit 1
+    fi
+
+    # 在远程服务器上安装依赖并重启服务
+    echo "在远程服务器上安装依赖并重启AI服务..."
+    ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SERVER_IP" \
+                    "cd $PYTHON_TARGET_DIR && chmod +x start.sh && ./start.sh restart"
+#    ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SERVER_IP" \
+#        "cd /root/rental/rental-ai-service && pip install -r requirements.txt && chmod +x start.sh && ./start.sh"
+
+    if [ $? -ne 0 ]; then
+        echo "AI服务部署失败"
+        exit 1
+    fi
+    
+    echo "AI服务部署完成"
 fi
 
 echo "模块 $MODULE_NAME 部署完成!"

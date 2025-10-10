@@ -16,7 +16,7 @@ llm = init_chat_model(
     api_key=os.getenv("DEEPSEEK_API_KEY")
 )
 
-def load_servers(file_path: str = "/Users/leiguoqiang/javaproj/rental/rental-ai-service/server_config.json") -> Dict[str, Any]:
+def load_servers(file_path: str = "./server_config.json") -> Dict[str, Any]:
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f).get("mcpServers", {})
 
