@@ -1,16 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Modal, Button, Input, List, Avatar, Typography, Space, message } from 'antd';
-import { SendOutlined, RobotOutlined, UserOutlined } from '@ant-design/icons';
+import { Modal, Button, Input, List, Avatar, Typography, Space, message, Popconfirm } from 'antd';
+import { SendOutlined, RobotOutlined, UserOutlined, CheckOutlined, CloseOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { aiAPI } from '../services/api';
 
 const { TextArea } = Input;
 const { Text } = Typography;
 
-interface Message {
+interface BaseMessage {
   role: 'user' | 'assistant';
-  content: string;
   timestamp: Date;
 }
+
+interface TextMessage extends BaseMessage {
+  type: 'text';
+  content: string;
+}
+
+interface ConfirmationMessage extends BaseMessage {
+  type: 'confirmation';
+  content: string;
+  actionType: string;
+  actionDescription: string;
+  // 存储原始的AI响应，用于后续确认时重新发送请求
+  originalResponse: any;
+}
+
+type Message = TextMessage | ConfirmationMessage;
 
 interface AIChatModalProps {
   visible: boolean;
@@ -21,6 +36,7 @@ const AIChatModal: React.FC<AIChatModalProps> = ({ visible, onClose }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
+      type: 'text',
       content: '您好！我是您的AI助手，可以帮助您管理门店和车辆。请问有什么我可以帮您的吗？',
       timestamp: new Date()
     }
@@ -56,8 +72,9 @@ const AIChatModal: React.FC<AIChatModalProps> = ({ visible, onClose }) => {
     if (!inputValue.trim() || loading) return;
 
     // 添加用户消息
-    const userMessage: Message = {
+    const userMessage: TextMessage = {
       role: 'user',
+      type: 'text',
       content: inputValue,
       timestamp: new Date()
     };
@@ -76,20 +93,87 @@ const AIChatModal: React.FC<AIChatModalProps> = ({ visible, onClose }) => {
         tenant_id: getTenantId()
       });
 
-      // 添加AI回复
-      const aiMessage: Message = {
+      // 检查是否需要确认
+      if (response.requires_confirmation) {
+        const confirmMessage: ConfirmationMessage = {
+          role: 'assistant',
+          type: 'confirmation',
+          content: response.content,
+          actionType: response.action_type || '',
+          actionDescription: response.action_description || '',
+          originalResponse: response, // 保存原始响应
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, confirmMessage]);
+      } else {
+        // 添加AI回复
+        const aiMessage: TextMessage = {
+          role: 'assistant',
+          type: 'text',
+          content: response.content,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, aiMessage]);
+      }
+    } catch (error: any) {
+      console.error('发送消息失败:', error);
+      message.error('发送消息失败: ' + (error.message || '未知错误'));
+      const errorMessage: TextMessage = {
         role: 'assistant',
-        content: response.content,  // 直接使用response.content
+        type: 'text',
+        content: '抱歉，我遇到了一些问题。请稍后再试。',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirmAction = async (originalResponse: any) => {
+    // 添加用户确认消息
+    const confirmMessage: TextMessage = {
+      role: 'user',
+      type: 'text',
+      content: '确认执行操作',
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, confirmMessage]);
+    setLoading(true);
+
+    try {
+      // 发送确认请求给后端，执行实际操作
+      // 这里需要调用后端API来执行确认的操作
+      // 我们可以通过在原始消息中添加一个确认标志来实现
+      const confirmRequest = {
+        messages: [...messages, confirmMessage].map(msg => ({
+          role: msg.role,
+          content: msg.content
+        })),
+        tenant_id: getTenantId(),
+        confirmed: true, // 添加确认标志
+        original_response: originalResponse // 传递原始响应
+      };
+
+      const response = await aiAPI.chat(confirmRequest);
+
+      // 添加AI回复
+      const aiMessage: TextMessage = {
+        role: 'assistant',
+        type: 'text',
+        content: response.content,
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, aiMessage]);
     } catch (error: any) {
-      console.error('发送消息失败:', error);
-      message.error('发送消息失败: ' + (error.message || '未知错误'));
-      const errorMessage: Message = {
+      console.error('执行操作失败:', error);
+      message.error('执行操作失败: ' + (error.message || '未知错误'));
+      const errorMessage: TextMessage = {
         role: 'assistant',
-        content: '抱歉，我遇到了一些问题。请稍后再试。',
+        type: 'text',
+        content: '❌ 抱歉，执行操作时遇到了问题。请稍后再试。',
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -103,6 +187,36 @@ const AIChatModal: React.FC<AIChatModalProps> = ({ visible, onClose }) => {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const renderMessageContent = (message: Message) => {
+    if (message.type === 'confirmation') {
+      return (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+            <ExclamationCircleOutlined style={{ color: '#faad14', fontSize: '16px', marginTop: '2px' }} />
+            <Text>{message.content}</Text>
+          </div>
+          <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
+            <Popconfirm
+              title="确认执行此操作？"
+              description="此操作将修改您的数据，请确认是否继续"
+              onConfirm={() => handleConfirmAction(message.originalResponse)}
+              okText="确认"
+              cancelText="取消"
+            >
+              <Button type="primary" size="small" icon={<CheckOutlined />}>
+                确认执行
+              </Button>
+            </Popconfirm>
+            <Button size="small" icon={<CloseOutlined />}>
+              取消
+            </Button>
+          </div>
+        </div>
+      );
+    }
+    return <Text>{message.content}</Text>;
   };
 
   return (
@@ -156,7 +270,7 @@ const AIChatModal: React.FC<AIChatModalProps> = ({ visible, onClose }) => {
                     borderRadius: '8px',
                     boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                   }}>
-                    <Text>{message.content}</Text>
+                    {renderMessageContent(message)}
                   </div>
                 </div>
               </List.Item>
