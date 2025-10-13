@@ -12,6 +12,7 @@
 - 后续计划提供AI的数据分析、行业动态、竞品比对等
 
 ## 在线体验
+(没有高可用部署，机器资源有限，有时候会挂掉 🐶)
 - SaaS端：http://43.143.163.102:8001/ ，账号：13511112223，密码：123456
 - Mis端：http://43.143.163.102:8002/ ，账号：admin，密码：admin
 - 用户端：http://43.143.163.102:8003/ ，账号：手机号注册，验证码：1111
@@ -22,8 +23,8 @@
 
 ```
 ├── rental-gateway          # API网关服务 (认证鉴权、限流熔断)
-├── rental-mcp-gateway      # MCP-API网关服务 (部署在122.51.43.52)
-├── rental-ai-service       # AI对话服务 (Langchain + DeepSeek，部署在122.51.43.52)
+├── rental-mcp-gateway      # MCP-API网关服务 (已实现门店管理和车辆管理)
+├── rental-ai-service       # AI对话服务 (Langchain + DeepSeek)
 ├── rental-user-service      # 用户服务 (商户入驻、员工管理、权限控制)
 ├── rental-base-data-service # 基础数据服务 (门店管理、车型库、车辆管理)
 ├── rental-product-service   # 商品服务 (车型商品、定价策略、增值服务)
